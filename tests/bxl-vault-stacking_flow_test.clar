@@ -1,4 +1,5 @@
 ;; @name stacking flow test
+;; @format-ignore
 (define-public (test-stacking)
   (begin
     ;; Deposit 1000 sSats

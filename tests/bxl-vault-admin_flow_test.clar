@@ -1,4 +1,5 @@
 ;; @name admin can not use principal
+;; @format-ignore
 (define-public (test-transfer-admin-fails)
   (begin
     ;; Deposit 1000 sSats
@@ -35,7 +36,7 @@
     success (err u999)
     error (begin (asserts! (is-eq error u500) (err u998))
           (ok true)
-    ) 
+    )
   )
 )
 
