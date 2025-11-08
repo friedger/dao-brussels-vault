@@ -1,4 +1,3 @@
-
 {
   "name": "dao-brussels-vault-tests",
   "version": "1.0.0",
@@ -14,9 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "@stacks/clarinet-sdk": "^3.9.1",
-    "@types/node": "^24.4.0",
+    "@stacks/clarunit": "^0.1.0",
     "@stacks/transactions": "^7.2.0",
+    "@types/node": "^24.4.0",
     "chokidar-cli": "^3.0.0",
+    "vite": "^7.2.2",
     "vitest": "^4.0.7",
     "vitest-environment-clarinet": "^3.0.1"
   }

@@ -26,6 +26,16 @@ path = "contracts/bxl-vault.clar"
 clarity = "4"
 epoch = "3.3"
 
+## Tests
+[contracts.bxl-vault_test]
+path = "tests/bxl-vault_test.clar"
+clarity = "4"
+epoch = "3.3"
+
+[contracts.bxl-vault-admin_flow_test]
+path = "tests/bxl-vault-admin_flow_test.clar"
+clarity = "4"
+epoch = "3.3"
 
 [repl.analysis]
 passes = ["check_checker"]
