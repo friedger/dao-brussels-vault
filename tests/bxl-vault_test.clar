@@ -3,9 +3,9 @@
     ;; Deposit 1000 sSats
     (try! (contract-call? .bxl-vault deposit u1000))
     ;; Withdraw 500 sSats
-    (try! (contract-call? .bxl-vault withdraw u500))
+    (try! (contract-call? .bxl-vault withdraw-request u500 u1000))
     ;; Withdraw 500 sSats
-    (try! (contract-call? .bxl-vault withdraw u500))
+    (try! (contract-call? .bxl-vault withdraw-request u500 u1000))
     ;; Deposit 2000 uSTX
     (try! (contract-call? .bxl-vault deposit-stx u2000))
     ;; Withdraw 1000 uSTX
@@ -31,19 +31,21 @@
 )
 
 (define-public (withdraw-fails (amount uint))
-  (match (contract-call? .bxl-vault withdraw amount)
+  (match (contract-call? .bxl-vault withdraw-request amount u1000)
     success (err u999)
-    error (begin (asserts! (is-eq error u1) (err u998))
-          (ok true)
-    ) 
+    error (begin
+      (asserts! (is-eq error u1) (err u998))
+      (ok true)
+    )
   )
 )
 
 (define-public (withdraw-stx-fails (amount uint))
   (match (contract-call? .bxl-vault withdraw-stx amount)
     success (err u999)
-    error (begin (asserts! (is-eq error u1) (err u998))
-          (ok true)
-    ) 
+    error (begin
+      (asserts! (is-eq error u1) (err u998))
+      (ok true)
+    )
   )
 )

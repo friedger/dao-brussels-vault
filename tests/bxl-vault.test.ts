@@ -171,4 +171,114 @@ describe("Bxl Btc Vault admin", () => {
       )
     );
   });
+
+  test("that user can withdraw", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // fast forward time
+    simnet.mineEmptyBlocks(1001);
+
+    // user executes withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+  });
+
+  test("that user can withdraw immediately with admin", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // admin executes withdrawal immediately
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      deployer
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+  });
+
+  test("that user cannot withdraw more than deposited", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(1500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(1));
+  });
+
+  test("that non-admin cannot call admin functions", () => {
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "admin-sbtc-transfer",
+      [Cl.uint(1), Cl.principal(wallet1)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(403));
+
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "admin-stx-transfer",
+      [Cl.uint(1), Cl.principal(wallet1)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(403));
+
+    response = simnet.callPublicFn("bxl-vault", "delegate-stx", [], wallet1);
+    expect(response.result).toBeErr(Cl.uint(403));
+
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "revoke-delegate-stx",
+      [],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(403));    
+  });
 });

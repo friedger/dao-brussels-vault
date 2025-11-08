@@ -8,3 +8,16 @@
     (ok true)
   )
 )
+
+(define-public (test-enroll-fails)
+  (begin
+    ;; Enroll the vault
+    (match (contract-call? .bxl-vault enroll)
+      success (err u999)
+      error (begin
+        (asserts! (is-eq error u104) (err error))
+        (ok true)
+      )
+    )
+  )
+)

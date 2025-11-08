@@ -4,6 +4,7 @@
 (define-constant err-too-much (err u500))
 
 (define-fungible-token bxl-btc)
+(define-fungible-token bxl-btc-locked)
 
 (define-data-var vault (optional principal) none)
 
@@ -59,10 +60,23 @@
   )
 )
 
-(define-public (burn (amount uint))
+(define-public (lock (amount uint))
   (begin
     (asserts! (is-vault-calling) err-not-allowed)
     (try! (ft-burn? bxl-btc amount tx-sender))
+    (try! (ft-mint? bxl-btc-locked amount current-contract))
+    (try! (ft-transfer? bxl-btc-locked amount current-contract tx-sender))
+    (ok true)
+  )
+)
+
+(define-public (burn
+    (amount uint)
+    (user principal)
+  )
+  (begin
+    (asserts! (is-vault-calling) err-not-allowed)
+    (try! (ft-burn? bxl-btc-locked amount user))
     (ok true)
   )
 )

@@ -1,8 +1,24 @@
 (define-constant err-not-allowed (err u403))
-(define-constant err-too-much (err u500))
+(define-constant err-not-found (err u404))
+(define-constant err-invalid-amount (err u500))
 (define-constant err-no-balance (err u501))
+(define-constant max-stacking-amount u1000000000000000)
 
 (define-data-var admin principal tx-sender)
+
+(define-data-var last-request-id uint u0)
+(define-map withdrawal-requests
+  uint
+  {
+    user: principal,
+    amount: uint,
+    opens-at: uint,
+  }
+)
+(define-map withdrawal-requests-by-user
+  principal
+  uint
+)
 
 (define-public (deposit (amount uint))
   (begin
@@ -12,10 +28,44 @@
   )
 )
 
-(define-public (withdraw (amount uint))
-  (begin
-    (try! (contract-call? .bxl-btc burn amount))
-    (try! (send-sbtc-from-vault amount tx-sender))
+(define-public (withdraw-request
+    (amount uint)
+    (delay uint)
+  )
+  (let ((request-id (+ (var-get last-request-id) u1)))
+    (asserts! (> amount u0) err-invalid-amount)
+    (try! (contract-call? .bxl-btc lock amount))
+    (map-set withdrawal-requests request-id {
+      user: tx-sender,
+      amount: amount,
+      opens-at: (+ burn-block-height
+        (if (< delay u1000)
+          u1000
+          delay
+        )),
+    })
+    (map-set withdrawal-requests-by-user tx-sender request-id)
+    (var-set last-request-id request-id)
+    (ok request-id)
+  )
+)
+
+(define-public (withdraw-finalize (request-id uint))
+  (let (
+      (details (unwrap! (map-get? withdrawal-requests request-id) err-not-found))
+      (amount (get amount details))
+      (user (get user details))
+    )
+    (asserts!
+      (or
+        (is-admin-calling)
+        (> burn-block-height (get opens-at details))
+      )
+      err-not-allowed
+    )
+    (try! (contract-call? .bxl-btc burn amount user))
+    (try! (send-sbtc-from-vault amount user))
+    (map-delete withdrawal-requests-by-user user)
     (ok true)
   )
 )
@@ -50,7 +100,7 @@
       (bxl-btc-supply (unwrap! (contract-call? .bxl-btc get-total-supply) err-no-balance))
     )
     (asserts! (is-admin-calling) err-not-allowed)
-    (asserts! (>= sbtc-balance (+ amount bxl-btc-supply)) err-too-much)
+    (asserts! (>= sbtc-balance (+ amount bxl-btc-supply)) err-invalid-amount)
     (try! (send-sbtc-from-vault amount recipient))
     (ok true)
   )
@@ -65,7 +115,7 @@
       (bxl-stx-supply (unwrap! (contract-call? .bxl-stx get-total-supply) err-no-balance))
     )
     (asserts! (is-admin-calling) err-not-allowed)
-    (asserts! (>= stx-balance (+ amount bxl-stx-supply)) err-too-much)
+    (asserts! (>= stx-balance (+ amount bxl-stx-supply)) err-invalid-amount)
     (try! (send-stx-from-vault amount recipient))
     (ok true)
   )
@@ -85,13 +135,14 @@
 (define-public (delegate-stx)
   (begin
     (asserts! (is-admin-calling) err-not-allowed)
-    (as-contract? ((with-stacking u1000000000000000))
+    (as-contract? ((with-stacking max-stacking-amount))
       (try! (contract-call?
         'SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.pox4-multi-pool-v1
-        delegate-stx u1000000000000000
+        delegate-stx max-stacking-amount
         (unwrap-panic (to-consensus-buff? {
           v: u1,
           c: "sbtc",
+          s: "bxl-vault",
         }))
       ))
     )
