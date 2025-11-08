@@ -362,6 +362,16 @@ plan:
             path: tests/bxl-vault-admin_flow_test.clar
             clarity-version: 4
         - emulated-contract-publish:
+            contract-name: bxl-vault-enroll_test
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: tests/bxl-vault-enroll_test.clar
+            clarity-version: 4
+        - emulated-contract-publish:
+            contract-name: bxl-vault-stacking_flow_test
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: tests/bxl-vault-stacking_flow_test.clar
+            clarity-version: 4
+        - emulated-contract-publish:
             contract-name: bxl-vault_test
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: tests/bxl-vault_test.clar
