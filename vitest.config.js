@@ -10,7 +10,7 @@ import { vitestSetupFilePath, getClarinetVitestsArgv } from "@stacks/clarinet-sd
   The `vitest-environment-clarinet` will initialise the clarinet-sdk
   and make the `simnet` object available globally in the test files.
 
-  `vitestSetupFilePath` points to a file in the `@hirosystems/clarinet-sdk` package that does two things:
+  `vitestSetupFilePath` points to a file in the `@stacks/clarinet-sdk` package that does two things:
     - run `before` hooks to initialize the simnet and `after` hooks to collect costs and coverage reports.
     - load custom vitest matchers to work with Clarity values (such as `expect(...).toBeUint()`)
 

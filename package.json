@@ -13,12 +13,12 @@
   "license": "ISC",
   "dependencies": {
     "@stacks/clarinet-sdk": "^3.9.1",
-    "@stacks/clarunit": "^0.1.0",
+    "@stacks/clarunit": "git@github.com:friedger/stacks-test-tools#8115ef5",
     "@stacks/transactions": "^7.2.0",
-    "@types/node": "^24.4.0",
+    "@types/node": "^24.10.0",
     "chokidar-cli": "^3.0.0",
     "vite": "^7.2.2",
-    "vitest": "^4.0.7",
+    "vitest": "^4.0.8",
     "vitest-environment-clarinet": "^3.0.1"
   }
 }

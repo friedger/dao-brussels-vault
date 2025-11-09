@@ -2,7 +2,7 @@
 name = "dao-brussels-vault"
 description = ""
 authors = []
-telemetry = false
+telemetry = true
 cache_dir = "./.cache"
 requirements = [
     {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token"},
@@ -28,29 +28,25 @@ epoch = "3.3"
 
 ## Tests
 [contracts.bxl-vault_test]
-path = "tests/bxl-vault_test.clar"
+path = "tests-clar/bxl-vault_test.clar"
 clarity = "4"
 epoch = "3.3"
 
 [contracts.bxl-vault-enroll_test]
-path = "tests/bxl-vault-enroll_test.clar"
+path = "tests-clar/bxl-vault-enroll_test.clar"
 clarity = "4"
 epoch = "3.3"
 
 [contracts.bxl-vault-stacking_flow_test]
-path = "tests/bxl-vault-stacking_flow_test.clar"
+path = "tests-clar/bxl-vault-stacking_flow_test.clar"
 clarity = "4"
 epoch = "3.3"
 
 [contracts.bxl-vault-admin_flow_test]
-path = "tests/bxl-vault-admin_flow_test.clar"
+path = "tests-clar/bxl-vault-admin_flow_test.clar"
 clarity = "4"
 epoch = "3.3"
 
-[contracts.bxl-vault-new-admin_flow_test]
-path = "tests/bxl-vault-new-admin_flow_test.clar"
-clarity = "4"
-epoch = "3.3"
 
 [repl.analysis]
 passes = ["check_checker"]
