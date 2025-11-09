@@ -1,4 +1,4 @@
-# BXL Vault: Bitcoin Yield for the Commons
+# BXL Vault: Bitcoin Yield for the Brussels Crypto Community
 
 **Version 1.0**  
 **Date: November 2025**  
@@ -8,26 +8,35 @@
 
 ## Abstract
 
-BXL Vault is a decentralized protocol built on the Stacks blockchain that enables users to generate a yield through Dual Stacking for the Commons by deposit Bitcoin. The protocol acknowledges ownership of Bitcoin through 1:1 backed wrapped bxlBTC tokens. The Commons is represented by an admin account, usually a multi-sig wallet controlled by stewards of the community.
+BXL Vault is a decentralized protocol built on the Stacks blockchain that enables users to protect the their Bitcoin and generate yield that goes directly to the community. Users maintain full ownership of their Bitcoin.
 
 ---
 
 ## 1. Introduction
 
-**Contribute to the Commons by granting access to your assets while maintaining ownership.** The DAO Brussels community generates yield from deposited assets, which stewards use to build and develop the Commons in Brussels.
+**"The safest place to store your Bitcoin is your community."**
 
-BXL Vault serves as a mechanism for community-driven resource allocation. When users deposit their Bitcoin into the vault, they maintain full ownership through 1:1 backed wrapped tokens, while simultaneously contributing to a shared pool that generates yield. This yield is then stewarded by the DAO Brussels community to fund public goods, infrastructure development, and other initiatives that benefit the Brussels Commons.
+BXL Vault serves as a mechanism for community-driven resource allocation. When users deposit and lock their Bitcoin into the vault, they maintain full ownership through 1:1 backed wrapped tokens, while simultaneously contributing to a shared pool that generates yield. This yield is then stewarded by the DAO Brussels community to fund public goods, infrastructure development, and other initiatives that benefit the Brussels Crypto Community.
 
-The yield is generated through Dual Stacking, an mechanism on the Stacks Blockchain to put Bitcoin at work through 1:1 backed sBTC tokens and Proof-of-transfer (PoX) stacking mechanism.
+**How does it work?**
 
+1. **Wrap your Bitcoin in sBTC** ([learn how to do it](https://docs.stacks.co/sbtc))
+2. **Deposit it in BXL Vault** - receive bxlBTC tokens representing your ownership
+3. **Yield goes to the community** - generated through Dual Stacking mechanisms
 
-### 1.1 Goals
+The yield is generated through Dual Stacking, a mechanism on the Stacks Blockchain to put Bitcoin to work through 1:1 backed sBTC tokens and Proof-of-Transfer (PoX) stacking.
 
-- **Community Contribution**: Enable Bitcoin holders to contribute to the Brussels Commons while maintaining ownership
-- **Yield Generation**: Participate in Bitcoin stacking rewards while maintaining token liquidity  
-- **Stewardship Model**: Channel generated yield toward building and developing the Commons in Brussels
-- **Decentralized Management**: Provide transparent, smart contract-based asset management
-- **Capital Efficiency**: Maximize utility of deposited Bitcoin through strategic stacking
+### 1.1 Main Features
+
+#### 🔧 Protection Against Wrench Attack
+BXL Vault makes sure that nobody can ever force user to transfer their Bitcoin to them. Wrapped Bitcoin (bxlBTC) can only be unlocked by the stewards of DAO Brussels or after a period of at least one week.
+
+#### 💰 Yield for the Community
+No need to donate. Users keep their assets. Users just make them available for the community to fund itself. It's like having a house and letting the community make use of it for free. Ownership does not change.
+
+#### 🏛️ Non-Taxable Event
+If users receive yield, it quickly becomes complicated with taxes. Is it really worth it? Users may as well use it as an endowment and make sure that the yield directly goes to the community.
+
 
 ### 1.2 Protocol Overview
 
@@ -58,15 +67,19 @@ The vault contract has one privileged admin account that can transfer rewards of
 2. Equivalent wrapped tokens (bxlBTC) are minted to the user
 3. Deposited sBTC is held in the vault and may be stacked for rewards
 
-#### Withdrawal Process
-1. Users burn their wrapped tokens (bxlBTC)
-2. Equivalent underlying sBTC is transferred from the vault. The 1:1 redemption ratio is maintained
+#### Withdrawal Process (🔧 Wrench Attack Protection)
+1. Users request a withdrawal by putting their wrapped tokens (bxlBTC) in transit.
+2. A time-delayed withdrawal request is created with a minimum 1-week delay (1000 Bitcoin blocks).
+3. Admin can execute the request immediately.
+4. During the delay period, users can cancel their withdrawal.
+5. After the delay period, users can finalize withdrawal to receive their sBTC.
+
 
 ### 2.2 Stacking Integration
 
 #### Bitcoin Stacking
 1. The vault enrolls in dual stacking protocols. Any user can call the enroll function as soon as the minimum sBTC balance is reached.
-2. sBTC rewards flow back to the vault
+2. sBTC rewards flow back to the vault and are managed by community stewards
 
 #### Stacks Stacking
 1. Users can deposit STX for enhanced stacking capabilities
@@ -82,7 +95,8 @@ The protocol includes administrative functions for:
 
 - Transferring sBTC rewards
 - Managing Dual Stacking enrollment and stacking delegation
-- Transferring admin privileges to a new account
+- Transferring admin privileges to a new account (typically a multi-sig or DAO contract)
+- Executing withdrawal requests
 
 ---
 
@@ -97,7 +111,7 @@ The protocol includes administrative functions for:
 | **Decimals** | 8 |
 | **Backed by** | sBTC tokens held in vault |
 | **Ratio** | 1:1 with underlying sBTC |
-| **Purpose** | Represent ownership of Bitcoin |
+| **Purpose** | Represent ownership of locked Bitcoin |
 
 ### 3.2 bxlSTX (BXL Stacks) - Stacking Operations
 
@@ -127,7 +141,7 @@ The protocol includes administrative functions for:
 #### Single Admin Control
 - Current implementation relies on single admin principal, who can transfer rewards and manage stacking
 
-**Mitigation**: Deployment with multi-sig
+**Mitigation**: Deployment with multi-sig, transfer privileges to multi-sig or DAO contract
 
 ### 4.3 External Dependencies
 
@@ -136,20 +150,21 @@ The protocol includes administrative functions for:
 - Dependence on Stacks PoX stacking mechanisms
 - Integration with third-party stacking pools
 
-**Mitigation**: Replace BXL Vault with a new version
+**Mitigation**: Replace BXL Vault with a new version if necessary
 
-### 4.4 Liquidity Risks
+### 4.4 Off-chain Risks
 
-#### Market Conditions
-- Wrapped token markets may develop differently than underlying assets
-- Potential arbitrage opportunities or price deviations
+#### Account access
+- Loss of seed phrase
 
-**Mitigation**: Arbitrage mechanisms and market maker incentives if a market for wrapped BXL tokens develops
+**Mitigation**: Use smart wallets/account abstraction
 
 ### 4.5 Related Risks
 Some risks known from other protocols and other platforms are eliminated by design of the Clarity language and of the protocol:
 * Reentrancy attacks 
+* Liquidity risks
 * Under-collateralization
+* Wrench attacks
 
 ---
 
@@ -169,15 +184,35 @@ Some risks known from other protocols and other platforms are eliminated by desi
 | **Assertions** | • User has sufficient sBTC balance<br>• sBTC transfer succeeds |
 | **Effects** | • Transfers sBTC from user to vault<br>• Mints equivalent bxlBTC to user |
 
-##### `withdraw(amount uint)`
+##### `withdraw-request(amount uint, delay uint)`
 
-**Purpose**: Burn bxlBTC and withdraw sBTC
+**Purpose**: Request withdrawal with time delay
 
 | Field | Description |
 |-------|-------------|
-| **Parameters** | `amount`: Amount of bxlBTC to burn/sBTC to withdraw in sats|
-| **Assertions** | • User has sufficient bxlBTC balance<br>• Vault has sufficient sBTC for transfer |
-| **Effects** | • Burns bxlBTC from user<br>• Transfers sBTC from vault to user |
+| **Parameters** | • `amount`: Amount of bxlBTC to burn/sBTC to withdraw in sats<br>• `delay`: Delay in blocks (minimum 1000 blocks ≈ 1 week) |
+| **Assertions** | • Amount > 0 (error u500 if invalid)<br>• User has sufficient bxlBTC balance (error u1 if insufficient)<br>• User doesn't have active withdrawal request (error u403 if forbidden)<br>• Delay >= minimum delay (1000 blocks) |
+| **Effects** | • Burns bxlBTC from user and locks into transit tokens<br>• Creates withdrawal request with specified delay<br>• Maps user to request ID (only one active request per user)<br>• Returns request ID |
+
+##### `withdraw-update(request-id uint, amount uint, delay uint)`
+
+**Purpose**: Update or cancel an existing withdrawal request
+
+| Field | Description |
+|-------|-------------|
+| **Parameters** | • `request-id`: ID of existing withdrawal request<br>• `amount`: New amount (0 to cancel)<br>• `delay`: New delay in blocks |
+| **Assertions** | • Request exists (error u404 if not found)<br>• User owns the request (error u401 if unauthorized)<br>• If amount > 0: user has sufficient bxlBTC balance |
+| **Effects** | • Unlocks previous amount from transit back to bxlBTC<br>• If amount = 0: deletes request and user mapping<br>• If amount > 0: locks new amount and updates request details<br>• Returns request ID |
+
+##### `withdraw-finalize(request-id uint)`
+
+**Purpose**: Finalize withdrawal after delay period or by admin
+
+| Field | Description |
+|-------|-------------|
+| **Parameters** | `request-id`: ID of the withdrawal request to finalize |
+| **Assertions** | • Request exists (error u404 if not found)<br>• User matches request owner (error u401 if unauthorized)<br>• Delay period has passed OR caller is admin<br>• Vault has sufficient sBTC for transfer |
+| **Effects** | • Burns transit tokens from user<br>• Transfers sBTC from vault to user<br>• Removes withdrawal request and user mapping |
 
 ##### `admin-sbtc-transfer(amount uint, recipient principal)`
 
@@ -208,8 +243,18 @@ Some risks known from other protocols and other platforms are eliminated by desi
 | Field | Description |
 |-------|-------------|
 | **Parameters** | `amount`: Amount of bxlSTX to burn/STX to withdraw in uSTX |
-| **Assertions** | • User has sufficient bxlSTX balance<br>• Vault has sufficient STX for transfer |
+| **Assertions** | • User has sufficient bxlSTX balance<br>• Vault has sufficient undelegated STX for transfer |
 | **Effects** | • Burns bxlSTX from user<br>• Transfers STX from vault to user |
+
+##### `enroll()`
+
+**Purpose**: Enroll vault in dual stacking to generate community yield
+
+| Field | Description |
+|-------|-------------|
+| **Parameters** | None |
+| **Assertions** | • Vault has minimum required sBTC balance |
+| **Effects** | • Enrolls vault in dual stacking protocol<br>• Enables sBTC reward generation for community |
 
 ##### `delegate-stx()`
 
@@ -219,7 +264,7 @@ Some risks known from other protocols and other platforms are eliminated by desi
 |-------|-------------|
 | **Parameters** | None |
 | **Assertions** | • Caller is admin<br>• Stacking delegation succeeds |
-| **Effects** | • Delegates 1,000,000 STX to pox4-multi-pool-v1<br>• Enables STX stacking rewards |
+| **Effects** | • Delegates up to 1,000,000 STX to pox4-multi-pool-v1<br>• Locks STX via PoX |
 
 ##### `revoke-delegate-stx()`
 
@@ -239,7 +284,17 @@ Some risks known from other protocols and other platforms are eliminated by desi
 |-------|-------------|
 | **Parameters** | • `amount`: Amount of STX to transfer<br>• `recipient`: Principal to receive the transfer |
 | **Assertions** | • Caller is admin<br>• Remaining STX balance >= bxlSTX total supply after transfer<br>• Transfer succeeds |
-| **Effects** | • Transfers STX from vault to recipient<br>• Maintains full collateralization |
+| **Effects** | • Transfers STX rewards from vault to recipient<br>• Maintains full collateralization |
+
+##### `admin-set-admin(admin principal, enable bool)`
+
+**Purpose**: Update admin privileges (admin only)
+
+| Field | Description |
+|-------|-------------|
+| **Parameters** | • `admin`: Principal to grant/revoke admin privileges<br>• `enable`: Whether to grant (true) or revoke (false) privileges |
+| **Assertions** | • Caller is admin |
+| **Effects** | • Updates admin privileges for specified principal |
 
 ### 5.2 BXL-BTC Token Contract
 
@@ -247,13 +302,13 @@ Some risks known from other protocols and other platforms are eliminated by desi
 
 ##### `transfer(amount uint, sender principal, recipient principal, memo (optional (buff 34)))`
 
-**Purpose**: Transfer bxlBTC tokens between principals
+**Purpose**: Transfer bxlBTC tokens between principals (disabled for security)
 
 | Field | Description |
 |-------|-------------|
 | **Parameters** | • `amount`: Amount to transfer<br>• `sender`: Source principal<br>• `recipient`: Destination principal<br>• `memo`: Optional transfer memo |
-| **Assertions** | • Caller is sender or has sender authorization<br>• Sender has sufficient balance |
-| **Effects** | • Transfers bxlBTC from sender to recipient<br>• Emits memo if provided |
+| **Assertions** | • Always fails (transfers disabled) |
+| **Effects** | • Returns error (transfers not allowed for security) |
 
 ##### `mint(amount uint)`
 
@@ -265,15 +320,25 @@ Some risks known from other protocols and other platforms are eliminated by desi
 | **Assertions** | • Caller is authorized vault contract |
 | **Effects** | • Mints bxlBTC to transaction sender<br>• Increases total supply |
 
-##### `burn(amount uint)`
+##### `lock(amount uint)`
 
-**Purpose**: Burn bxlBTC tokens (vault only)
+**Purpose**: Lock bxlBTC tokens during withdrawal request (vault only)
 
 | Field | Description |
 |-------|-------------|
-| **Parameters** | `amount`: Amount to burn |
-| **Assertions** | • Caller is authorized vault contract<br>• Sender has sufficient balance |
-| **Effects** | • Burns bxlBTC from transaction sender<br>• Decreases total supply |
+| **Parameters** | `amount`: Amount to lock |
+| **Assertions** | • Caller is authorized vault contract<br>• User has sufficient bxlBTC balance |
+| **Effects** | • Burns bxlBTC from user<br>• Mints equivalent transit tokens<br>• Transfers transit tokens to user |
+
+##### `burn(amount uint, user principal)`
+
+**Purpose**: Burn transit tokens during withdrawal finalization (vault only)
+
+| Field | Description |
+|-------|-------------|
+| **Parameters** | • `amount`: Amount to burn<br>• `user`: User whose tokens to burn |
+| **Assertions** | • Caller is authorized vault contract<br>• User has sufficient transit tokens |
+| **Effects** | • Burns transit tokens from specified user<br>• Decreases transit supply |
 
 ### 5.3 BXL-STX Token Contract
 
@@ -281,13 +346,13 @@ Some risks known from other protocols and other platforms are eliminated by desi
 
 ##### `transfer(amount uint, sender principal, recipient principal, memo (optional (buff 34)))`
 
-**Purpose**: Transfer bxlSTX tokens between principals
+**Purpose**: Transfer bxlSTX tokens between principals (disabled for security)
 
 | Field | Description |
 |-------|-------------|
 | **Parameters** | • `amount`: Amount to transfer<br>• `sender`: Source principal<br>• `recipient`: Destination principal<br>• `memo`: Optional transfer memo |
-| **Assertions** | • Caller is sender or has sender authorization<br>• Sender has sufficient balance |
-| **Effects** | • Transfers bxlSTX from sender to recipient<br>• Emits memo if provided |
+| **Assertions** | • Always fails (transfers disabled) |
+| **Effects** | • Returns error (transfers not allowed for security) |
 
 ##### `mint(amount uint)`
 
@@ -330,13 +395,17 @@ Some risks known from other protocols and other platforms are eliminated by desi
 
 ### 6.4 Enhanced User Security
 - Support for time locks and community based approvals
+- Advanced wrench attack protection mechanisms
+- Multi-signature withdrawal approvals
 
 ---
 
 ## 7. Conclusion
 
-BXL Vault provides a foundational infrastructure for deploying Bitcoins for the benefit of the Commons. The protocol's transparent design and 1:1 backing mechanism ensure user funds remain secure.
+BXL Vault provides a secure way to support the Brussels Crypot Community by staking your Bitcoin while maintaining full ownership. The protocol's transparent design, 1:1 backing mechanism, and wrench attack protection ensure your funds remain secure while generating yield that is directly received by and benefits the community.
+
+**Remember: "The safest place to store your Bitcoin is your community."**
 
 ---
 
-**Disclaimer**: This whitepaper is for informational purposes only and does not constitute financial advice. Users should conduct their own research and understand the risks involved before interacting with the protocol. Users should only deploy the amount of Bitcoins they are comfortable with.
+**Disclaimer**: This whitepaper is for informational purposes only and does not constitute financial advice. Users should conduct their own research and understand the risks involved before interacting with the protocol. Users should only lock the amount of Bitcoin they are comfortable with.

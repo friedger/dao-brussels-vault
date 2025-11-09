@@ -1,6 +1,7 @@
 (define-constant contract-owner tx-sender)
 
-(define-constant err-not-allowed (err u403))
+(define-constant err-unauthorized (err u401))
+(define-constant err-forbidden (err u403))
 (define-constant err-too-much (err u500))
 
 (define-fungible-token bxl-stx)
@@ -14,16 +15,10 @@
     (memo (optional (buff 34)))
   )
   (begin
-    (asserts! (or (is-eq tx-sender sender) (is-eq contract-caller sender))
-      err-not-allowed
+    (if false
+      (ok true)
+      err-forbidden
     )
-    (try! (ft-transfer? bxl-stx amount sender recipient))
-
-    (match memo
-      to-print (print to-print)
-      0x
-    )
-    (ok true)
   )
 )
 
@@ -53,7 +48,7 @@
 
 (define-public (mint (amount uint))
   (begin
-    (asserts! (is-vault-calling) err-not-allowed)
+    (asserts! (is-vault-calling) err-unauthorized)
     (try! (ft-mint? bxl-stx amount tx-sender))
     (ok true)
   )
@@ -61,7 +56,7 @@
 
 (define-public (burn (amount uint))
   (begin
-    (asserts! (is-vault-calling) err-not-allowed)
+    (asserts! (is-vault-calling) err-unauthorized)
     (try! (ft-burn? bxl-stx amount tx-sender))
     (ok true)
   )
@@ -74,7 +69,7 @@
 ;; can be called only once
 (define-public (set-vault (blx-vault principal))
   (begin
-    (asserts! (is-none (var-get vault)) err-not-allowed)
+    (asserts! (is-none (var-get vault)) err-forbidden)
     (var-set vault (some blx-vault))
     (ok true)
   )

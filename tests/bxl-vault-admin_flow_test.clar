@@ -1,6 +1,6 @@
 ;; @name admin can not use principal
 ;; @format-ignore
-(define-public (test-transfer-admin-fails)
+(define-public (test-withdraw-admin-fails)
   (begin
     ;; Deposit 1000 sSats
     ;; @caller wallet_1
@@ -15,7 +15,7 @@
 )
 
 ;; @name admin can use yield
-(define-public (test-transfer-admin)
+(define-public (test-withdraw-admin)
   (begin
     ;; Deposit 1000 sSats
     ;; @caller wallet_1
@@ -32,18 +32,25 @@
 )
 
 (define-public (withdraw-admin-fails)
-  (match (contract-call? .bxl-vault admin-sbtc-transfer u1 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG)
+  (match (contract-call? .bxl-vault admin-sbtc-transfer u1
+    'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+  )
     success (err u999)
-    error (begin (asserts! (is-eq error u500) (err u998))
-          (ok true)
+    error (begin
+      (asserts! (is-eq error u500) (err u998))
+      (ok true)
     )
   )
 )
 
 (define-public (send-yield)
- (contract-call? 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token transfer u10 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG .bxl-vault none)
+  (contract-call? 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token transfer
+    u10 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG .bxl-vault none
+  )
 )
 
 (define-public (withdraw-admin)
-  (contract-call? .bxl-vault admin-sbtc-transfer u10 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG)
+  (contract-call? .bxl-vault admin-sbtc-transfer u10
+    'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+  )
 )

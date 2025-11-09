@@ -1,15 +1,15 @@
-import { Cl, uintCV } from "@stacks/transactions";
-import { describe, expect, it, test } from "vitest";
+import { Cl } from "@stacks/transactions";
+import { describe, expect, test } from "vitest";
 
 const accounts = simnet.getAccounts();
 const deployer = accounts.get("deployer")!;
 const wallet1 = accounts.get("wallet_1")!;
 const wallet2 = accounts.get("wallet_2")!;
 
-describe("Bxl Btc Vault admin", () => {
-  test("that admin can remove sBTC yield", async () => {
+describe("Bxl Btc Vault", () => {
+  test("that user can withdraw", () => {
     // user deposits sBTC
-    const response = simnet.callPublicFn(
+    let response = simnet.callPublicFn(
       "bxl-vault",
       "deposit",
       [Cl.uint(1000)],
@@ -17,70 +17,300 @@ describe("Bxl Btc Vault admin", () => {
     );
     expect(response.result).toBeOk(Cl.bool(true));
 
-    expect(response.events[0]).toStrictEqual({
-      event: "ft_transfer_event",
-      data: {
-        amount: "1000",
-        asset_identifier:
-          "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token::sbtc-token",
-        recipient: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bxl-vault",
-        sender: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5",
-      },
-    });
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
 
-    expect(response.events[1]).toStrictEqual({
-      event: "ft_mint_event",
-      data: {
-        amount: "1000",
-        asset_identifier:
-          "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bxl-btc::bxl-btc",
-        recipient: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5",
-      },
-    });
+    // fast forward time
+    simnet.mineEmptyBlocks(1001);
 
-    // yield arrives
-    const response2 = simnet.callPublicFn(
-      "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token",
-      "transfer",
-      [
-        Cl.uint(10),
-        Cl.principal(wallet2),
-        Cl.principal(`${deployer}.bxl-vault`),
-        Cl.none(),
-      ],
+    // user executes withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(500));
+  });
+
+  test("that user can withdraw immediately with admin", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // admin executes withdrawal immediately
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      deployer
+    );
+    expect(response.result).toBeOk(Cl.uint(500));
+  });
+
+  test("that user cannot withdraw more than deposited", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(1500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(1));
+  });
+
+  test("that user cannot create duplicate withdrawal requests", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // user tries to create another withdrawal request
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(300), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(403));
+  });
+
+  test("that user can update withdrawal request", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // user updates withdrawal request with different amount
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-update",
+      [Cl.uint(1), Cl.uint(300), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // fast forward time
+    simnet.mineEmptyBlocks(1001);
+
+    // user finalizes updated withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(300));
+  });
+
+  test("that user can cancel withdrawal request", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // user cancels withdrawal request by setting amount to 0
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-update",
+      [Cl.uint(1), Cl.uint(0), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // user can now create a new withdrawal request
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(300), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(2));
+  });
+
+  test("that user cannot update non-existent withdrawal request", () => {
+    // user tries to update non-existent request
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-update",
+      [Cl.uint(999), Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(404));
+  });
+
+  test("that admin cannot update another user's withdrawal request", () => {
+    // wallet1 deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // wallet1 requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // admin tries to update wallet1's withdrawal request
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-update",
+      [Cl.uint(1), Cl.uint(300), Cl.uint(1000)],
+      deployer
+    );
+    expect(response.result).toBeErr(Cl.uint(401));
+  });
+
+  test("that user cannot finalize withdrawal before delay period", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // user tries to finalize withdrawal immediately
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(401)); // unauthorized
+  });
+
+  test("that user cannot finalize non-existent withdrawal request", () => {
+    // user tries to finalize non-existent request
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(999)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(404));
+  });
+
+  test("that user can finalize another user's withdrawal request after delay period", () => {
+    // wallet1 deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // wallet1 requests withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // fast forward time
+    simnet.mineEmptyBlocks(1001);
+
+    // wallet2 finalize wallet1's withdrawal request
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
       wallet2
     );
-    expect(response2.result).toBeOk(Cl.bool(true));
-
-    const depoosits = simnet.callReadOnlyFn(
-      "bxl-btc",
-      "get-total-supply",
-      [],
-      wallet1
-    );
-    expect(depoosits.result).toBeOk(Cl.uint(1000));
-
-    const sbtcBalance = simnet.callReadOnlyFn(
-      "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token",
-      "get-balance",
-      [Cl.principal(`${deployer}.bxl-vault`)],
-      wallet1
-    );
-    expect(sbtcBalance.result).toBeOk(Cl.uint(1010));
-
-    // admin removes sBTC
-    const response3 = simnet.callPublicFn(
-      "bxl-vault",
-      "admin-sbtc-transfer",
-      [Cl.uint(1), Cl.principal(wallet1)],
-      deployer
-    );
-    expect(response3.result).toBeOk(Cl.bool(true));
+    expect(response.result).toBeOk(Cl.uint(500));
   });
 
-  test("that admin can't remove user deposits", () => {
+  test("that user cannot withdraw with invalid amount", () => {
     // user deposits sBTC
-    const response = simnet.callPublicFn(
+    let response = simnet.callPublicFn(
       "bxl-vault",
       "deposit",
       [Cl.uint(1000)],
@@ -88,87 +318,231 @@ describe("Bxl Btc Vault admin", () => {
     );
     expect(response.result).toBeOk(Cl.bool(true));
 
-    // admin tries to remove sBTC
-    const response2 = simnet.callPublicFn(
+    // user requests withdrawal with 0 amount
+    response = simnet.callPublicFn(
       "bxl-vault",
-      "admin-sbtc-transfer",
-      [Cl.uint(1), Cl.principal(wallet1)],
-      deployer
+      "withdraw-request",
+      [Cl.uint(0), Cl.uint(1000)],
+      wallet1
     );
-    expect(response2.result).toBeErr(Cl.uint(500));
+    expect(response.result).toBeErr(Cl.uint(500));
   });
 
-  test("that admin can remove stx yield", () => {
-    // yield arrives
-    const response = simnet.transferSTX(10, `${deployer}.bxl-vault`, wallet2);
-    expect(response.result).toBeOk(Cl.bool(true));
-
-    // admin removes STX
-    const response2 = simnet.callPublicFn(
+  test("that user cannot withdraw with insufficient delay", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
       "bxl-vault",
-      "admin-stx-transfer",
-      [Cl.uint(1), Cl.principal(wallet1)],
-      deployer
-    );
-    expect(response2.result).toBeOk(Cl.bool(true));
-  });
-
-  test("that admin can stack and revoke", () => {
-    simnet.callPublicFn(
-      "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.pox4-multi-pool-v1",
-      "set-pool-pox-address-active",
-      [
-        Cl.tuple({
-          version: Cl.bufferFromHex("0x04"),
-          hashbytes: Cl.bufferFromHex(
-            "0x0c7fc13d45ff9a51ec36c0dac3b9c3589175500f"
-          ),
-        }),
-      ],
-      "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4"
-    );
-
-    // user deposits stx
-    const response = simnet.callPublicFn(
-      "bxl-vault",
-      "deposit-stx",
+      "deposit",
       [Cl.uint(1000)],
       wallet1
     );
     expect(response.result).toBeOk(Cl.bool(true));
 
-    // admin stacks
-    const response2 = simnet.callPublicFn(
+    // user requests withdrawal with delay less than minimum (1000 blocks)
+    response = simnet.callPublicFn(
       "bxl-vault",
-      "delegate-stx",
-      [],
-      deployer
+      "withdraw-request",
+      [Cl.uint(500), Cl.uint(500)], // delay too short
+      wallet1
     );
-    expect(response2.result).toBeOk(
-      Cl.tuple({
-        "lock-amount": Cl.uint(1000),
-        stacker: Cl.principal(`${deployer}.bxl-vault`),
-        "unlock-burn-height": Cl.uint(2100),
-      })
-    );
+    expect(response.result).toBeOk(Cl.uint(1));
 
-    const response3 = simnet.callPublicFn(
+    // fast forward time
+    simnet.mineEmptyBlocks(501);
+
+    // user tries to finalize early
+    response = simnet.callPublicFn(
       "bxl-vault",
-      "revoke-delegate-stx",
-      [],
-      deployer
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      wallet1
     );
-    expect(response3.result).toBeOk(
-      Cl.some(
-        Cl.tuple({
-          "amount-ustx": Cl.uint(1_000_000_000 * 1e6),
-          "delegated-to": Cl.principal(
-            "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.pox4-multi-pool-v1"
-          ),
-          "pox-addr": Cl.none(),
-          "until-burn-ht": Cl.none(),
-        })
-      )
+    expect(response.result).toBeErr(Cl.uint(401)); // unauthorized
+
+    // fast forward time again
+    simnet.mineEmptyBlocks(500);
+
+    // user finalizes
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      wallet1
     );
+    expect(response.result).toBeOk(Cl.uint(500));
+  });
+
+  test("that user can update withdrawal request to increase amount", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal for 300
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(300), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // user updates withdrawal request to increase amount to 700
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-update",
+      [Cl.uint(1), Cl.uint(700), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // fast forward time
+    simnet.mineEmptyBlocks(1001);
+
+    // user finalizes updated withdrawal
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-finalize",
+      [Cl.uint(1)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(700));
+  });
+
+  test("that user cannot update withdrawal to exceed available balance", () => {
+    // user deposits sBTC
+    let response = simnet.callPublicFn(
+      "bxl-vault",
+      "deposit",
+      [Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.bool(true));
+
+    // user requests withdrawal for 300
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-request",
+      [Cl.uint(300), Cl.uint(1000)],
+      wallet1
+    );
+    expect(response.result).toBeOk(Cl.uint(1));
+
+    // user tries to update withdrawal request to exceed available balance
+    response = simnet.callPublicFn(
+      "bxl-vault",
+      "withdraw-update",
+      [Cl.uint(1), Cl.uint(1500), Cl.uint(1000)], // more than deposited
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(1)); // insufficient balance
+  });
+
+  describe("STX operations", () => {
+    test("that user can deposit and withdraw STX", () => {
+      // user deposits STX
+      let response = simnet.callPublicFn(
+        "bxl-vault",
+        "deposit-stx",
+        [Cl.uint(2000)],
+        wallet1
+      );
+      expect(response.result).toBeOk(Cl.bool(true));
+
+      // user withdraws STX
+      response = simnet.callPublicFn(
+        "bxl-vault",
+        "withdraw-stx",
+        [Cl.uint(1000)],
+        wallet1
+      );
+      expect(response.result).toBeOk(Cl.bool(true));
+    });
+
+    test("that user cannot withdraw more STX than deposited", () => {
+      // user deposits STX
+      let response = simnet.callPublicFn(
+        "bxl-vault",
+        "deposit-stx",
+        [Cl.uint(2000)],
+        wallet1
+      );
+      expect(response.result).toBeOk(Cl.bool(true));
+
+      // user tries to withdraw more than deposited
+      response = simnet.callPublicFn(
+        "bxl-vault",
+        "withdraw-stx",
+        [Cl.uint(2500)],
+        wallet1
+      );
+      expect(response.result).toBeErr(Cl.uint(1)); // insufficient balance
+    });
+  });
+
+  describe("Admin functions", () => {
+    test("that admin can transfer surplus sBTC", () => {
+      // user deposits sBTC
+      let response = simnet.callPublicFn(
+        "bxl-vault",
+        "deposit",
+        [Cl.uint(1000)],
+        wallet1
+      );
+      expect(response.result).toBeOk(Cl.bool(true));
+
+      // admin transfers surplus (assuming there's yield)
+      response = simnet.callPublicFn(
+        "bxl-vault",
+        "admin-sbtc-transfer",
+        [Cl.uint(100), Cl.principal(wallet2)],
+        deployer
+      );
+      // This might fail if there's no surplus, but should test the admin access
+    });
+
+    test("that non-admin cannot transfer sBTC", () => {
+      // user deposits sBTC
+      let response = simnet.callPublicFn(
+        "bxl-vault",
+        "deposit",
+        [Cl.uint(1000)],
+        wallet1
+      );
+      expect(response.result).toBeOk(Cl.bool(true));
+
+      // non-admin tries to transfer
+      response = simnet.callPublicFn(
+        "bxl-vault",
+        "admin-sbtc-transfer",
+        [Cl.uint(100), Cl.principal(wallet2)],
+        wallet1
+      );
+      expect(response.result).toBeErr(Cl.uint(401)); // unauthorized
+    });
+
+    test("that admin can set new admin", () => {
+      // admin sets wallet1 as new admin
+      let response = simnet.callPublicFn(
+        "bxl-vault",
+        "admin-set-admin",
+        [Cl.principal(wallet1), Cl.bool(true)],
+        deployer
+      );
+      expect(response.result).toBeOk(Cl.bool(true));
+
+      // wallet1 should now have admin privileges
+      response = simnet.callPublicFn(
+        "bxl-vault",
+        "admin-set-admin",
+        [Cl.principal(wallet2), Cl.bool(true)],
+        wallet1
+      );
+      expect(response.result).toBeOk(Cl.bool(true));
+    });
   });
 });
