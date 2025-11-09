@@ -64,11 +64,6 @@ plan:
     - id: 0
       transactions:
         - emulated-contract-publish:
-            contract-name: sip-010-trait-ft-standard
-            emulated-sender: SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4
-            path: "./.cache/requirements/SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: arkadiko-dao-token-trait-v1
             emulated-sender: SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR
             path: "./.cache/requirements/SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-dao-token-trait-v1.clar"
@@ -88,8 +83,16 @@ plan:
             emulated-sender: SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR
             path: "./.cache/requirements/SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-dao.clar"
             clarity-version: 1
-      epoch: "2.1"
+      epoch: "2.0"
     - id: 1
+      transactions:
+        - emulated-contract-publish:
+            contract-name: sip-010-trait-ft-standard
+            emulated-sender: SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4
+            path: "./.cache/requirements/SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.clar"
+            clarity-version: 1
+      epoch: "2.05"
+    - id: 2
       transactions:
         - emulated-contract-publish:
             contract-name: ft-trait
@@ -172,7 +175,7 @@ plan:
             path: "./.cache/requirements/SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-vaults-data-v1-1.clar"
             clarity-version: 2
       epoch: "2.4"
-    - id: 2
+    - id: 3
       transactions:
         - emulated-contract-publish:
             contract-name: sip-010-trait-ft-standard-v-1-1
@@ -195,7 +198,7 @@ plan:
             path: "./.cache/requirements/SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.curve-math_v1_0_0.clar"
             clarity-version: 2
       epoch: "2.5"
-    - id: 3
+    - id: 4
       transactions:
         - emulated-contract-publish:
             contract-name: sbtc-registry
@@ -248,7 +251,7 @@ plan:
             path: "./.cache/requirements/SP20X3DC5R091J8B6YPQT638J8NR1W83KN6TN5BJY.curve-pool-v1_0_0_ststx-0001.clar"
             clarity-version: 3
       epoch: "3.0"
-    - id: 4
+    - id: 5
       transactions:
         - emulated-contract-publish:
             contract-name: stableswap-pool-trait-v-1-4
@@ -321,7 +324,7 @@ plan:
             path: "./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.block-info-nakamoto-ststx-ratio-v2.clar"
             clarity-version: 3
       epoch: "3.1"
-    - id: 5
+    - id: 6
       transactions:
         - emulated-contract-publish:
             contract-name: bitcoin-block-buffer
@@ -339,7 +342,7 @@ plan:
             path: "./.cache/requirements/SP1HFCRKEJ8BYW4D0E3FAWHFDX8A25PPAA83HWWZ9.dual-stacking-v1.clar"
             clarity-version: 3
       epoch: "3.2"
-    - id: 6
+    - id: 7
       transactions:
         - emulated-contract-publish:
             contract-name: bxl-btc

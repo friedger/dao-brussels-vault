@@ -4,7 +4,8 @@
 (define-constant err-no-balance (err u501))
 (define-constant max-stacking-amount u1000000000000000)
 
-(define-data-var admin principal tx-sender)
+(define-map admins principal bool)
+(map-set admins tx-sender true)
 
 (define-data-var last-request-id uint u0)
 (define-map withdrawal-requests
@@ -121,6 +122,14 @@
   )
 )
 
+(define-public (admin-set-admin (admin principal) (enable bool))
+  (begin
+    (asserts! (is-admin-calling) err-not-allowed)
+    (var-set admin new-admin)
+    (ok true)
+  )
+)
+
 ;; Dual Stacking
 
 ;; sbtc rewards go to this vault
@@ -164,7 +173,7 @@
 ;; private functions
 
 (define-private (is-admin-calling)
-  (is-eq tx-sender (var-get admin))
+  (default-to false (map-get? admins tx-sender))
 )
 
 (define-private (send-sbtc-to-vault (amount uint))
