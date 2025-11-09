@@ -2,7 +2,8 @@
 (define-constant err-too-much (err u500))
 (define-constant err-no-balance (err u501))
 
-(define-data-var admin principal tx-sender)
+(define-map admins principal bool)
+(map-set admins tx-sender true)
 
 (define-public (deposit (amount uint))
   (begin
@@ -71,6 +72,14 @@
   )
 )
 
+(define-public (admin-set-admin (admin principal) (enable bool))
+  (begin
+    (asserts! (is-admin-calling) err-not-allowed)
+    (var-set admin new-admin)
+    (ok true)
+  )
+)
+
 ;; Dual Stacking
 
 ;; sbtc rewards go to this vault
@@ -113,7 +122,7 @@
 ;; private functions
 
 (define-private (is-admin-calling)
-  (is-eq tx-sender (var-get admin))
+  (default-to false (map-get? admins tx-sender))
 )
 
 (define-private (send-sbtc-to-vault (amount uint))
