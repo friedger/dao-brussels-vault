@@ -47,6 +47,11 @@ path = "tests/bxl-vault-admin_flow_test.clar"
 clarity = "4"
 epoch = "3.3"
 
+[contracts.bxl-vault-new-admin_flow_test]
+path = "tests/bxl-vault-new-admin_flow_test.clar"
+clarity = "4"
+epoch = "3.3"
+
 [repl.analysis]
 passes = ["check_checker"]
 check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }

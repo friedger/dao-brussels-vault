@@ -1,6 +1,6 @@
 ;; @name admin can not use principal
 ;; @format-ignore
-(define-public (test-transfer-admin-fails)
+(define-public (test-withdraw-admin-fails)
   (begin
     ;; Deposit 1000 sSats
     ;; @caller wallet_1
@@ -15,7 +15,7 @@
 )
 
 ;; @name admin can use yield
-(define-public (test-transfer-admin)
+(define-public (test-withdraw-admin)
   (begin
     ;; Deposit 1000 sSats
     ;; @caller wallet_1
