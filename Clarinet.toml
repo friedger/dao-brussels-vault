@@ -6,46 +6,95 @@ telemetry = true
 cache_dir = "./.cache"
 requirements = [
     {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token"},
-    {contract_id = "SP1HFCRKEJ8BYW4D0E3FAWHFDX8A25PPAA83HWWZ9.dual-stacking-v1"},
-    {contract_id = "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.pox4-multi-pool-v1"}
+    # v2: sBTC balances on simnet, and the two live sBTC pools
+    {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-deposit"},
+    {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-withdrawal"},
+    {contract_id = "SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1"},
+    {contract_id = "SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3"}
 ]
 
-[contracts.bxl-btc]
+# Clarinet's bundled pox-5 differs from the canonical one the pools and signer
+# managers are written against (same file as ../../fastpool/fastpool-pox-5).
+[project.override_boot_contracts_source]
+pox-5 = "./boot/pox-5.clar"
+
+# bxl-tokens are unchanged
+
+[contracts.bxl-btc-v2]
 path = "contracts/bxl-btc.clar"
-clarity = "4"
-epoch = "3.3"
+clarity = "6"
+epoch = "4.0"
 
-
-[contracts.bxl-stx]
+[contracts.bxl-stx-v2]
 path = "contracts/bxl-stx.clar"
-clarity = "4"
-epoch = "3.3"
+clarity = "6"
+epoch = "4.0"
 
-[contracts.bxl-vault]
-path = "contracts/bxl-vault.clar"
-clarity = "4"
-epoch = "3.3"
+## v2 (pox-5)
+
+# Esbee bond pool as deployed on mainnet (esbee-dao-bond-staker-1 and friends):
+# git tag v-bond-1 of fastpool/sbtc-pool-bond-staker, checked out as a worktree.
+[contracts.bond-escrow]
+path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/rendezvous/bond-escrow.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bond-treasury]
+path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/bond-treasury.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.iou-bond-btc]
+path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/iou-bond-btc.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.iou-bond-stx]
+path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/iou-bond-stx.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bond-staker]
+path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/bond-staker.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.sbtc-pool-trait]
+path = "contracts/sbtc-pool-trait.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bxl-vault-v2]
+path = "contracts/bxl-vault-v2.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bxl-pool-stbtc]
+path = "contracts/bxl-pool-stbtc.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bxl-pool-xverse]
+path = "contracts/bxl-pool-xverse.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bxl-pool-esbee]
+path = "contracts/bxl-pool-esbee.clar"
+clarity_version = 6
+epoch = "4.0"
 
 ## Tests
-[contracts.bxl-vault_test]
-path = "tests-clar/bxl-vault_test.clar"
-clarity = "4"
-epoch = "3.3"
+# A registered pox-5 signer for staking tests (Fast Pool's manager).
+[contracts.signer-manager]
+path = "../../fastpool/fastpool-pox-5/contracts/signer-manager.clar"
+clarity_version = 6
+epoch = "4.0"
 
-[contracts.bxl-vault-enroll_test]
-path = "tests-clar/bxl-vault-enroll_test.clar"
-clarity = "4"
-epoch = "3.3"
-
-[contracts.bxl-vault-stacking_flow_test]
-path = "tests-clar/bxl-vault-stacking_flow_test.clar"
-clarity = "4"
-epoch = "3.3"
-
-[contracts.bxl-vault-admin_flow_test]
-path = "tests-clar/bxl-vault-admin_flow_test.clar"
-clarity = "4"
-epoch = "3.3"
+[contracts.mock-sbtc-pool]
+path = "tests/mocks/mock-sbtc-pool.clar"
+clarity_version = 6
+epoch = "4.0"
 
 
 [repl.analysis]
