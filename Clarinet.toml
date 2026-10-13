@@ -97,6 +97,16 @@ clarity_version = 6
 epoch = "4.0"
 
 
+[contracts.bxl-vault_test]
+path = "tests-clar/bxl-vault_test.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bxl-vault-admin_flow_test]
+path = "tests-clar/bxl-vault-admin_flow_test.clar"
+clarity_version = 6
+epoch = "4.0"
+
 [repl.analysis]
 passes = ["check_checker"]
 check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }

@@ -22,7 +22,7 @@ describe("BXL-BTC Token Contract", () => {
   test("that non-vault cannot mint tokens", () => {
     // Non-vault tries to mint tokens
     let response = simnet.callPublicFn(
-      "bxl-btc",
+      "bxl-btc-v2",
       "mint",
       [Cl.uint(1000)],
       wallet1
@@ -33,7 +33,7 @@ describe("BXL-BTC Token Contract", () => {
   test("that non-vault cannot lock tokens", () => {
     // Non-vault tries to lock tokens
     let response = simnet.callPublicFn(
-      "bxl-btc",
+      "bxl-btc-v2",
       "lock",
       [Cl.uint(500)],
       wallet1
@@ -44,7 +44,7 @@ describe("BXL-BTC Token Contract", () => {
   test("that non-vault cannot burn tokens", () => {
     // Non-vault tries to burn tokens
     let response = simnet.callPublicFn(
-      "bxl-btc",
+      "bxl-btc-v2",
       "burn",
       [Cl.uint(300), Cl.principal(wallet1)],
       wallet1
@@ -60,7 +60,7 @@ describe("BXL-BTC Token Contract", () => {
 
     // Try to transfer tokens (should fail)
     response = simnet.callPublicFn(
-      "bxl-btc",
+      "bxl-btc-v2",
       "transfer",
       [Cl.uint(500), Cl.principal(deployer), Cl.principal(wallet1), Cl.none()],
       deployer
@@ -71,7 +71,7 @@ describe("BXL-BTC Token Contract", () => {
   test("that vault can be set only once", () => {
     // Try to set vault again (should fail if already set)
     let response = simnet.callPublicFn(
-      "bxl-btc",
+      "bxl-btc-v2",
       "set-vault",
       [Cl.principal(wallet1)],
       deployer

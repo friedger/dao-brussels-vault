@@ -5,7 +5,7 @@ import { Cl } from "@stacks/transactions";
  */
 export function depositSbtc(amount: number, user: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "deposit",
     [Cl.uint(amount)],
     user
@@ -17,7 +17,7 @@ export function depositSbtc(amount: number, user: string) {
  */
 export function depositStx(amount: number, user: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "deposit-stx",
     [Cl.uint(amount)],
     user
@@ -29,7 +29,7 @@ export function depositStx(amount: number, user: string) {
  */
 export function withdrawRequest(amount: number, delay: number, user: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "withdraw-request",
     [Cl.uint(amount), Cl.uint(delay)],
     user
@@ -41,7 +41,7 @@ export function withdrawRequest(amount: number, delay: number, user: string) {
  */
 export function withdrawUpdate(requestId: number, amount: number, delay: number, user: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "withdraw-update",
     [Cl.uint(requestId), Cl.uint(amount), Cl.uint(delay)],
     user
@@ -53,7 +53,7 @@ export function withdrawUpdate(requestId: number, amount: number, delay: number,
  */
 export function withdrawFinalize(requestId: number, user: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "withdraw-finalize",
     [Cl.uint(requestId)],
     user
@@ -65,7 +65,7 @@ export function withdrawFinalize(requestId: number, user: string) {
  */
 export function withdrawStx(amount: number, user: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "withdraw-stx",
     [Cl.uint(amount)],
     user
@@ -77,7 +77,7 @@ export function withdrawStx(amount: number, user: string) {
  */
 export function adminSbtcTransfer(amount: number, recipient: string, admin: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "admin-sbtc-transfer",
     [Cl.uint(amount), Cl.principal(recipient)],
     admin
@@ -89,33 +89,9 @@ export function adminSbtcTransfer(amount: number, recipient: string, admin: stri
  */
 export function adminStxTransfer(amount: number, recipient: string, admin: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "admin-stx-transfer",
     [Cl.uint(amount), Cl.principal(recipient)],
-    admin
-  );
-}
-
-/**
- * Delegate STX for stacking
- */
-export function delegateStx(admin: string) {
-  return simnet.callPublicFn(
-    "bxl-vault",
-    "delegate-stx",
-    [],
-    admin
-  );
-}
-
-/**
- * Revoke STX delegation
- */
-export function revokeDelegateStx(admin: string) {
-  return simnet.callPublicFn(
-    "bxl-vault",
-    "revoke-delegate-stx",
-    [],
     admin
   );
 }
@@ -125,7 +101,7 @@ export function revokeDelegateStx(admin: string) {
  */
 export function setAdmin(admin: string, enable: boolean, caller: string) {
   return simnet.callPublicFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "admin-set-admin",
     [Cl.principal(admin), Cl.bool(enable)],
     caller
@@ -137,7 +113,7 @@ export function setAdmin(admin: string, enable: boolean, caller: string) {
  */
 export function getWithdrawalRequest(requestId: number) {
   const response = simnet.callReadOnlyFn(
-    "bxl-vault",
+    "bxl-vault-v2",
     "get-withdrawal-request",
     [Cl.uint(requestId)],
     simnet.getAccounts().get("deployer")!
@@ -159,23 +135,6 @@ export function transferSbtcToVault(amount: number, sender: string, vaultAddress
       Cl.none(),
     ],
     sender
-  );
-}
-
-/**
- * Setup pool for stacking tests
- */
-export function setupStackingPool() {
-  return simnet.callPublicFn(
-    "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.pox4-multi-pool-v1",
-    "set-pool-pox-address-active",
-    [
-      Cl.tuple({
-        version: Cl.bufferFromHex("0x04"),
-        hashbytes: Cl.bufferFromHex("0x0c7fc13d45ff9a51ec36c0dac3b9c3589175500f"),
-      }),
-    ],
-    "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4"
   );
 }
 

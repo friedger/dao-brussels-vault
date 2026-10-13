@@ -5,7 +5,7 @@ import { Cl } from "@stacks/transactions";
  */
 export function getBxlBtcBalance(user: string) {
   const response = simnet.callReadOnlyFn(
-    "bxl-btc",
+    "bxl-btc-v2",
     "get-balance",
     [Cl.principal(user)],
     user
@@ -18,7 +18,7 @@ export function getBxlBtcBalance(user: string) {
  */
 export function getBxlStxBalance(user: string) {
   const response = simnet.callReadOnlyFn(
-    "bxl-stx",
+    "bxl-stx-v2",
     "get-balance",
     [Cl.principal(user)],
     user
@@ -31,7 +31,7 @@ export function getBxlStxBalance(user: string) {
  */
 export function getTotalBxlBtcSupply() {
   const response = simnet.callReadOnlyFn(
-    "bxl-btc",
+    "bxl-btc-v2",
     "get-total-supply",
     [],
     simnet.getAccounts().get("deployer")!
@@ -44,7 +44,7 @@ export function getTotalBxlBtcSupply() {
  */
 export function getTotalBxlStxSupply() {
   const response = simnet.callReadOnlyFn(
-    "bxl-stx",
+    "bxl-stx-v2",
     "get-total-supply",
     [],
     simnet.getAccounts().get("deployer")!
@@ -76,10 +76,10 @@ export function getStxBalance(user: string) {
  * Check token metadata for bxlBTC
  */
 export function getBxlBtcMetadata() {
-  const name = simnet.callReadOnlyFn("bxl-btc", "get-name", [], simnet.getAccounts().get("deployer")!);
-  const symbol = simnet.callReadOnlyFn("bxl-btc", "get-symbol", [], simnet.getAccounts().get("deployer")!);
-  const decimals = simnet.callReadOnlyFn("bxl-btc", "get-decimals", [], simnet.getAccounts().get("deployer")!);
-  const uri = simnet.callReadOnlyFn("bxl-btc", "get-token-uri", [], simnet.getAccounts().get("deployer")!);
+  const name = simnet.callReadOnlyFn("bxl-btc-v2", "get-name", [], simnet.getAccounts().get("deployer")!);
+  const symbol = simnet.callReadOnlyFn("bxl-btc-v2", "get-symbol", [], simnet.getAccounts().get("deployer")!);
+  const decimals = simnet.callReadOnlyFn("bxl-btc-v2", "get-decimals", [], simnet.getAccounts().get("deployer")!);
+  const uri = simnet.callReadOnlyFn("bxl-btc-v2", "get-token-uri", [], simnet.getAccounts().get("deployer")!);
   
   return { name, symbol, decimals, uri };
 }
@@ -88,10 +88,10 @@ export function getBxlBtcMetadata() {
  * Check token metadata for bxlSTX
  */
 export function getBxlStxMetadata() {
-  const name = simnet.callReadOnlyFn("bxl-stx", "get-name", [], simnet.getAccounts().get("deployer")!);
-  const symbol = simnet.callReadOnlyFn("bxl-stx", "get-symbol", [], simnet.getAccounts().get("deployer")!);
-  const decimals = simnet.callReadOnlyFn("bxl-stx", "get-decimals", [], simnet.getAccounts().get("deployer")!);
-  const uri = simnet.callReadOnlyFn("bxl-stx", "get-token-uri", [], simnet.getAccounts().get("deployer")!);
+  const name = simnet.callReadOnlyFn("bxl-stx-v2", "get-name", [], simnet.getAccounts().get("deployer")!);
+  const symbol = simnet.callReadOnlyFn("bxl-stx-v2", "get-symbol", [], simnet.getAccounts().get("deployer")!);
+  const decimals = simnet.callReadOnlyFn("bxl-stx-v2", "get-decimals", [], simnet.getAccounts().get("deployer")!);
+  const uri = simnet.callReadOnlyFn("bxl-stx-v2", "get-token-uri", [], simnet.getAccounts().get("deployer")!);
   
   return { name, symbol, decimals, uri };
 }

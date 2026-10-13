@@ -21,7 +21,7 @@ describe("BXL-STX Token Contract", () => {
 
   test("that non-vault cannot mint tokens", () => {
     let response = simnet.callPublicFn(
-      "bxl-stx",
+      "bxl-stx-v2",
       "mint",
       [Cl.uint(1000000)],
       wallet1
@@ -31,7 +31,7 @@ describe("BXL-STX Token Contract", () => {
 
   test("that non-vault cannot burn tokens", () => {
     let response = simnet.callPublicFn(
-      "bxl-stx",
+      "bxl-stx-v2",
       "burn",
       [Cl.uint(300000)],
       wallet1
@@ -47,7 +47,7 @@ describe("BXL-STX Token Contract", () => {
 
     // Try to transfer tokens (should fail)
     response = simnet.callPublicFn(
-      "bxl-stx",
+      "bxl-stx-v2",
       "transfer",
       [Cl.uint(500000), Cl.principal(deployer), Cl.principal(wallet1), Cl.none()],
       deployer
