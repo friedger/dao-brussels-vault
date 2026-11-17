@@ -173,11 +173,13 @@
     ;; can take at exactly what is reported.
     (try! (as-contract?
       (
-        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token" sats)
+        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
+        sats
+      )
         (with-stx ustx)
       )
-      (try! (contract-call? .bxl-vault-v2 pool-withdrawn sats ustx
-        (get sats position) (get ustx position)
+      (try! (contract-call? .bxl-vault-v2 pool-withdrawn sats ustx (get sats position)
+        (get ustx position)
       ))
     ))
     (ok sats)

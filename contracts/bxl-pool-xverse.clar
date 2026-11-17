@@ -67,8 +67,7 @@
     ;; result is only inspected.
     (is-ok (as-contract? ()
       (is-ok (contract-call?
-        'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3
-        withdraw
+        'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3 withdraw
       ))
     ))
     (match (contract-call?
@@ -232,11 +231,13 @@
     ;; can take at exactly what is reported.
     (try! (as-contract?
       (
-        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token" sats)
+        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
+        sats
+      )
         (with-stx ustx)
       )
-      (try! (contract-call? .bxl-vault-v2 pool-withdrawn sats ustx
-        (get sats position) (get ustx position)
+      (try! (contract-call? .bxl-vault-v2 pool-withdrawn sats ustx (get sats position)
+        (get ustx position)
       ))
     ))
     (ok sats)
@@ -247,7 +248,9 @@
 ;; books: bonded, queued and released but not yet paid out. Anyone may pay
 ;; rewards or released principal to this contract; that cannot change these.
 (define-private (get-pool-position)
-  (match (contract-call? 'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3 get-settled-member current-contract)
+  (match (contract-call? 'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3
+    get-settled-member current-contract
+  )
     member {
       sats: (+ (get bonded-sats member) (get queued-sats member)
         (get released-sats member)

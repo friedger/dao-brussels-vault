@@ -34,9 +34,11 @@
     (asserts! (is-eq ustx u0) err-invalid-amount)
     (asserts! (> sats u0) err-invalid-amount)
     (try! (as-contract?
-      ((with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
+      (
+        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
         sats
-      ))
+      )
+      )
       (try! (contract-call?
         'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1
         deposit sats u0
@@ -83,9 +85,11 @@
     (asserts! (is-vault-admin) err-unauthorized)
     (let (
         (nft-id (try! (as-contract?
-          ((with-ft 'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-token "stbtc"
+          (
+            (with-ft 'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-token "stbtc"
             stbtc
-          ))
+          )
+          )
           (try! (contract-call?
             'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1
             init-withdraw stbtc
@@ -110,8 +114,9 @@
   (begin
     (asserts! (is-vault-admin) err-unauthorized)
     (var-set queued-sats
-      (- (var-get queued-sats) (default-to u0 (map-get? queued-withdrawals nft-id)))
-    )
+      (- (var-get queued-sats)
+        (default-to u0 (map-get? queued-withdrawals nft-id))
+      ))
     (map-delete queued-withdrawals nft-id)
     (as-contract?
       ((with-nft 'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-withdraw-nft
@@ -177,7 +182,11 @@
     ;; what it can take at exactly what is reported. The position left with
     ;; StackingDAO is what the vault keeps as principal.
     (try! (as-contract?
-      ((with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token" sats))
+      (
+        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
+        sats
+      )
+      )
       (try! (contract-call? .bxl-vault-v2 pool-withdrawn sats u0 (get-position) u0))
     ))
     (ok sats)

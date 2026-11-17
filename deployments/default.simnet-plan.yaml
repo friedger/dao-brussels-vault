@@ -82,11 +82,6 @@ plan:
   - id: 1
     transactions:
     - transaction-type: emulated-contract-publish
-      contract-name: sbtc-deposit
-      emulated-sender: SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4
-      path: .cache/requirements/SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-deposit.clar
-      clarity-version: 3
-    - transaction-type: emulated-contract-publish
       contract-name: sbtc-withdrawal
       emulated-sender: SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4
       path: .cache/requirements/SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-withdrawal.clar
@@ -187,6 +182,8 @@ plan:
       emulated-sender: SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE
       path: .cache/requirements/SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3.clar
       clarity-version: 6
+      remap-principals:
+        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
     - transaction-type: emulated-contract-publish
       contract-name: bond-escrow
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
@@ -232,11 +229,15 @@ plan:
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       path: contracts/bxl-vault-v2.clar
       clarity-version: 6
+      remap-principals:
+        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
     - transaction-type: emulated-contract-publish
       contract-name: bxl-pool-esbee
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       path: contracts/bxl-pool-esbee.clar
       clarity-version: 6
+      remap-principals:
+        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
     - transaction-type: emulated-contract-publish
       contract-name: bxl-pool-stbtc
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
@@ -247,29 +248,21 @@ plan:
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       path: contracts/bxl-pool-xverse.clar
       clarity-version: 6
+      remap-principals:
+        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
     - transaction-type: emulated-contract-publish
       contract-name: bxl-vault-admin_flow_test
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       path: tests-clar/bxl-vault-admin_flow_test.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
-      contract-name: bxl-vault-enroll_test
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: tests-clar/bxl-vault-enroll_test.clar
-      clarity-version: 6
-    epoch: '4.0'
-  - id: 4
-    transactions:
-    - transaction-type: emulated-contract-publish
-      contract-name: bxl-vault-stacking_flow_test
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: tests-clar/bxl-vault-stacking_flow_test.clar
-      clarity-version: 6
-    - transaction-type: emulated-contract-publish
       contract-name: bxl-vault_test
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       path: tests-clar/bxl-vault_test.clar
       clarity-version: 6
+    epoch: '4.0'
+  - id: 4
+    transactions:
     - transaction-type: emulated-contract-publish
       contract-name: mock-sbtc-pool
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
@@ -280,4 +273,6 @@ plan:
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       path: ../../fastpool/fastpool-pox-5/contracts/signer-manager.clar
       clarity-version: 6
+      remap-principals:
+        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
     epoch: '4.0'

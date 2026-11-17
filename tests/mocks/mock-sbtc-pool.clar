@@ -43,12 +43,12 @@
     (asserts! (contract-call? .bxl-vault-v2 is-admin tx-sender) err-unauthorized)
     (try! (as-contract?
       (
-        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token" amount)
+        (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
+        amount
+      )
         (with-stx ustx)
       )
-      (try! (contract-call? .bxl-vault-v2 pool-withdrawn amount ustx
-        (- held amount) u0
-      ))
+      (try! (contract-call? .bxl-vault-v2 pool-withdrawn amount ustx (- held amount) u0))
     ))
     (ok amount)
   )

@@ -136,10 +136,7 @@
       (user (get user details))
     )
     (asserts!
-      (or
-        (is-admin-calling)
-        (> burn-block-height (get opens-at details))
-      )
+      (or (is-admin-calling) (> burn-block-height (get opens-at details)))
       err-unauthorized
     )
     (try! (contract-call? .bxl-btc-v2 burn amount user))
@@ -462,7 +459,8 @@
   (default-to {
     sats: u0,
     ustx: u0,
-  } (map-get? pool-principal pool)
+  }
+    (map-get? pool-principal pool)
   )
 )
 
