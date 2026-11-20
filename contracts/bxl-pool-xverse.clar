@@ -13,8 +13,7 @@
 (impl-trait .sbtc-pool-trait.sbtc-pool-trait)
 (use-trait signer-manager-trait 'SP000000000000000000002Q6VF78.pox-5.signer-manager-trait)
 
-(define-constant err-unauthorized (err u401))
-(define-constant err-invalid-amount (err u500))
+(define-constant ERR_UNAUTHORIZED (err u401))
 
 (define-constant VAULT .bxl-vault-v2)
 
@@ -23,7 +22,7 @@
     (ustx uint)
   )
   (begin
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
     ;; Zero sats: the STX waits here for `commit-rollover`.
     (try! (as-contract?
       (
@@ -60,7 +59,7 @@
 ;; `commit-rollover`, or `request-exit` or `unstake-sbtc-early` first.
 (define-public (withdraw (sats uint))
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     ;; Either may have nothing to return; that is not an error here. The
     ;; queued deposit can only be taken back before epoch 0.
     ;; `try!` inside `as-contract?` would leave this function, so the inner
@@ -83,7 +82,7 @@
 
 (define-public (collect-rewards)
   (begin
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
     (match (contract-call?
       'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3
       sync-rewards
@@ -108,7 +107,7 @@
 ;; `enroll` and zero sats.
 (define-public (commit-rollover)
   (let ((ustx (stx-get-balance current-contract)))
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? ((with-stx ustx))
       (try! (contract-call?
         'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3
@@ -120,7 +119,7 @@
 
 (define-public (cancel-rollover-commitment)
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? ()
       (try! (contract-call?
         'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3
@@ -132,7 +131,7 @@
 
 (define-public (request-exit)
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? ()
       (try! (contract-call?
         'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3
@@ -144,7 +143,7 @@
 
 (define-public (cancel-exit)
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? ()
       (try! (contract-call?
         'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3
@@ -161,7 +160,7 @@
     (sats uint)
   )
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? ()
       (try! (contract-call?
         'SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3

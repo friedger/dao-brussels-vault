@@ -1,7 +1,7 @@
-;; BXL Vault v2: the v1 user mechanics on pox-5.
+;; BXL Vault v2
 ;;
-;; Users deposit sBTC and STX and get bxl-btc and bxl-stx 1:1, exactly as in
-;; v1. The admin puts the sBTC to work in one of the sBTC pools behind
+;; Users deposit sBTC and STX and get bxl-btc and bxl-stx 1:1.
+;; The admin puts the sBTC to work in one of the sBTC pools behind
 ;; `sbtc-pool-trait` (stBTC, Xverse, Esbee) and stakes the free STX with a
 ;; pox-5 signer manager. All rewards arrive in this contract as sBTC; anything
 ;; above what the vault owes its users is the yield.
@@ -21,6 +21,8 @@
 ;; The pools passed to an admin transfer do not cover all deployed principal.
 (define-constant ERR_POOLS_INCOMPLETE (err u505))
 (define-constant ERR_DUPLICATE_POOL (err u506))
+
+(define-constant MINIMUM_WITHDRAW_DELAY_BLOCKS u1000)
 
 (define-map admins
   principal
@@ -85,8 +87,8 @@
       user: tx-sender,
       amount: amount,
       opens-at: (+ burn-block-height
-        (if (< delay u1000)
-          u1000
+        (if (< delay MINIMUM_WITHDRAW_DELAY_BLOCKS)
+          MINIMUM_WITHDRAW_DELAY_BLOCKS
           delay
         )),
     })
@@ -123,8 +125,8 @@
           user: tx-sender,
           amount: amount,
           opens-at: (+ burn-block-height
-            (if (< delay u1000)
-              u1000
+            (if (< delay MINIMUM_WITHDRAW_DELAY_BLOCKS)
+              MINIMUM_WITHDRAW_DELAY_BLOCKS
               delay
             )),
         })
@@ -146,8 +148,6 @@
     )
     (try! (contract-call? .bxl-btc-v2 burn amount user))
     (try! (send-sbtc-from-vault amount user))
-    ;; v1 kept the request, so an old, open id could pay out a later request's
-    ;; locked tokens before that request's delay.
     (map-delete withdrawal-requests request-id)
     (map-delete withdrawal-requests-by-user user)
     (ok amount)

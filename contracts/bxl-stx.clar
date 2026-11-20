@@ -1,6 +1,5 @@
-(define-constant err-unauthorized (err u401))
-(define-constant err-forbidden (err u403))
-(define-constant err-too-much (err u500))
+(define-constant ERR_UNAUTHORIZED (err u401))
+(define-constant ERR_FORBIDDEN (err u403))
 
 (define-fungible-token bxl-stx)
 
@@ -17,7 +16,7 @@
   (begin
     (if false
       (ok true)
-      err-forbidden
+      ERR_FORBIDDEN
     )
   )
 )
@@ -48,7 +47,7 @@
 
 (define-public (mint (amount uint))
   (begin
-    (asserts! (is-vault-calling) err-unauthorized)
+    (asserts! (is-vault-calling) ERR_UNAUTHORIZED)
     (try! (ft-mint? bxl-stx amount tx-sender))
     (ok true)
   )
@@ -56,7 +55,7 @@
 
 (define-public (burn (amount uint))
   (begin
-    (asserts! (is-vault-calling) err-unauthorized)
+    (asserts! (is-vault-calling) ERR_UNAUTHORIZED)
     (try! (ft-burn? bxl-stx amount tx-sender))
     (ok true)
   )
@@ -69,8 +68,8 @@
 ;; can be called only once, by the deployer
 (define-public (set-vault (blx-vault principal))
   (begin
-    (asserts! (is-eq tx-sender DEPLOYER) err-unauthorized)
-    (asserts! (is-none (var-get vault)) err-forbidden)
+    (asserts! (is-eq tx-sender DEPLOYER) ERR_UNAUTHORIZED)
+    (asserts! (is-none (var-get vault)) ERR_FORBIDDEN)
     (var-set vault (some blx-vault))
     (ok true)
   )

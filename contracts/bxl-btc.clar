@@ -1,6 +1,5 @@
-(define-constant err-unauthorized (err u401))
-(define-constant err-forbidden (err u403))
-(define-constant err-too-much (err u500))
+(define-constant ERR_UNAUTHORIZED (err u401))
+(define-constant ERR_FORBIDDEN (err u403))
 
 (define-fungible-token bxl-btc)
 (define-fungible-token bxl-btc-transit)
@@ -17,7 +16,7 @@
   )
   (if false
     (ok true)
-    err-forbidden
+    ERR_FORBIDDEN
   )
 )
 
@@ -57,7 +56,7 @@
 
 (define-public (mint (amount uint))
   (begin
-    (asserts! (is-vault-calling) err-unauthorized)
+    (asserts! (is-vault-calling) ERR_UNAUTHORIZED)
     (try! (ft-mint? bxl-btc amount tx-sender))
     (ok true)
   )
@@ -65,7 +64,7 @@
 
 (define-public (lock (amount uint))
   (begin
-    (asserts! (is-vault-calling) err-unauthorized)
+    (asserts! (is-vault-calling) ERR_UNAUTHORIZED)
     (try! (ft-burn? bxl-btc amount tx-sender))
     ;; mint to contract first for better post conditions
     (try! (ft-mint? bxl-btc-transit amount current-contract))
@@ -76,7 +75,7 @@
 
 (define-public (unlock (amount uint))
   (begin
-    (asserts! (is-vault-calling) err-unauthorized)
+    (asserts! (is-vault-calling) ERR_UNAUTHORIZED)
     (try! (ft-burn? bxl-btc-transit amount tx-sender))
     ;; mint to contract first for better post conditions
     (try! (ft-mint? bxl-btc amount current-contract))
@@ -90,7 +89,7 @@
     (user principal)
   )
   (begin
-    (asserts! (is-vault-calling) err-unauthorized)
+    (asserts! (is-vault-calling) ERR_UNAUTHORIZED)
     (try! (ft-burn? bxl-btc-transit amount user))
     (ok true)
   )
@@ -103,8 +102,8 @@
 ;; can be called only once, by the deployer
 (define-public (set-vault (blx-vault principal))
   (begin
-    (asserts! (is-eq tx-sender DEPLOYER) err-unauthorized)
-    (asserts! (is-none (var-get vault)) err-forbidden)
+    (asserts! (is-eq tx-sender DEPLOYER) ERR_UNAUTHORIZED)
+    (asserts! (is-none (var-get vault)) ERR_FORBIDDEN)
     (var-set vault (some blx-vault))
     (ok true)
   )

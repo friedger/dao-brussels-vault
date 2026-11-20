@@ -10,8 +10,8 @@
 ;; forwards the sBTC. Until then the queued sBTC still counts as principal.
 (impl-trait .sbtc-pool-trait.sbtc-pool-trait)
 
-(define-constant err-unauthorized (err u401))
-(define-constant err-invalid-amount (err u500))
+(define-constant ERR_UNAUTHORIZED (err u401))
+(define-constant ERR_INVALID_AMOUNT (err u500))
 
 (define-constant VAULT .bxl-vault-v2)
 (define-constant ONE_8 u100000000)
@@ -29,10 +29,10 @@
     (ustx uint)
   )
   (begin
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
     ;; stBTC has no STX leg.
-    (asserts! (is-eq ustx u0) err-invalid-amount)
-    (asserts! (> sats u0) err-invalid-amount)
+    (asserts! (is-eq ustx u0) ERR_INVALID_AMOUNT)
+    (asserts! (> sats u0) ERR_INVALID_AMOUNT)
     (try! (as-contract?
       (
         (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
@@ -53,7 +53,7 @@
 ;; sBTC handed over.
 (define-public (withdraw (sats uint))
   (let ((stbtc (min-of (sats-to-stbtc sats) (get-stbtc-balance))))
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (if (> stbtc u0)
       (try! (as-contract?
         ((with-ft 'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-token "stbtc"
@@ -73,7 +73,7 @@
 
 (define-public (collect-rewards)
   (begin
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
     (ok u0)
   )
 )
@@ -82,7 +82,7 @@
 
 (define-public (init-withdraw (stbtc uint))
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (let (
         (nft-id (try! (as-contract?
           (
@@ -112,7 +112,7 @@
 ;; The sBTC stays here until the next `withdraw`.
 (define-public (finish-withdraw (nft-id uint))
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (var-set queued-sats
       (- (var-get queued-sats)
         (default-to u0 (map-get? queued-withdrawals nft-id))

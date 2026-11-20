@@ -15,8 +15,8 @@
 (impl-trait .sbtc-pool-trait.sbtc-pool-trait)
 (use-trait signer-manager-trait 'SP000000000000000000002Q6VF78.pox-5.signer-manager-trait)
 
-(define-constant err-unauthorized (err u401))
-(define-constant err-invalid-amount (err u500))
+(define-constant ERR_UNAUTHORIZED (err u401))
+(define-constant ERR_INVALID_AMOUNT (err u500))
 
 (define-constant VAULT .bxl-vault-v2)
 
@@ -31,8 +31,8 @@
         u0
       ))
     )
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
-    (asserts! (>= ustx required) err-invalid-amount)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
+    (asserts! (>= ustx required) ERR_INVALID_AMOUNT)
     (try! (as-contract?
       (
         (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
@@ -63,7 +63,7 @@
 ;; `request-exit` or `unstake-sbtc-early` first.
 (define-public (withdraw (sats uint))
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     ;; Either may have nothing to return; that is not an error here.
     ;; `try!` inside `as-contract?` would leave this function, so the inner
     ;; result is only inspected.
@@ -86,7 +86,7 @@
 
 (define-public (collect-rewards)
   (begin
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
     (match (contract-call? .bond-staker sync-rewards)
       synced true
       e false
@@ -102,14 +102,14 @@
 
 (define-public (request-exit)
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? () (try! (contract-call? .bond-staker request-exit)))
   )
 )
 
 (define-public (cancel-exit)
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? () (try! (contract-call? .bond-staker cancel-exit)))
   )
 )
@@ -121,7 +121,7 @@
     (sats uint)
   )
   (begin
-    (asserts! (is-vault-admin) err-unauthorized)
+    (asserts! (is-vault-admin) ERR_UNAUTHORIZED)
     (as-contract? ()
       (try! (contract-call? .bond-staker unstake-sbtc-early manager sats))
     )

@@ -2,7 +2,7 @@
 ;; rewards that a test adds with `add-rewards`.
 (impl-trait .sbtc-pool-trait.sbtc-pool-trait)
 
-(define-constant err-unauthorized (err u401))
+(define-constant ERR_UNAUTHORIZED (err u401))
 
 (define-constant VAULT .bxl-vault-v2)
 
@@ -46,7 +46,7 @@
     (ustx uint)
   )
   (begin
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
     (if (is-eq (var-get cheat) u1)
       (try! (send-to-vault u1 u0))
       true
@@ -65,7 +65,7 @@
       ))
       (ustx (stx-get-balance current-contract))
     )
-    (asserts! (contract-call? .bxl-vault-v2 is-admin tx-sender) err-unauthorized)
+    (asserts! (contract-call? .bxl-vault-v2 is-admin tx-sender) ERR_UNAUTHORIZED)
     (try! (as-contract?
       (
         (with-ft 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token "sbtc-token"
@@ -81,7 +81,7 @@
 
 (define-public (collect-rewards)
   (let ((amount (var-get rewards)))
-    (asserts! (is-eq contract-caller VAULT) err-unauthorized)
+    (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)
     (var-set rewards u0)
     (try! (send-to-vault amount u0))
     (ok (if (is-eq (var-get cheat) u2)

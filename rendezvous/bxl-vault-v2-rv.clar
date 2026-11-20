@@ -23,12 +23,7 @@
 
 ;; Every contract in this project that implements `sbtc-pool-trait`, so every
 ;; contract the vault can ever have deployed into here.
-(define-constant POOLS (list
-  .mock-sbtc-pool
-  .bxl-pool-stbtc
-  .bxl-pool-xverse
-  .bxl-pool-esbee
-))
+(define-constant POOLS (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee))
 
 (define-constant MIN_DELAY u1000)
 ;; Delays above the minimum, so some requests wait longer.
@@ -129,9 +124,7 @@
       (request-id (default-to (pick-request-id n)
         (contract-call? .bxl-vault-v2 get-withdrawal-request-id tx-sender)
       ))
-      (new-amount (mod amount
-        (+ u1 (get-bxl-btc tx-sender) (get-transit tx-sender))
-      ))
+      (new-amount (mod amount (+ u1 (get-bxl-btc tx-sender) (get-transit tx-sender))))
     )
     (try! (contract-call? .bxl-vault-v2 withdraw-update request-id new-amount
       (mod delay MAX_DELAY)
@@ -347,11 +340,13 @@
             (request-id (unwrap! (contract-call? .bxl-vault-v2 withdraw-request requested u0)
               (err u1005)
             ))
-            (request (unwrap! (contract-call? .bxl-vault-v2 get-withdrawal-request request-id)
+            (request (unwrap!
+              (contract-call? .bxl-vault-v2 get-withdrawal-request request-id)
               (err u1006)
             ))
           )
-          (asserts! (is-eq request-id (contract-call? .bxl-vault-v2 get-last-request-id))
+          (asserts!
+            (is-eq request-id (contract-call? .bxl-vault-v2 get-last-request-id))
             (err u1007)
           )
           (asserts!
@@ -366,7 +361,8 @@
             (err u1009)
           )
           (asserts! (is-eq (get-transit user) (+ transit requested)) (err u1010))
-          (unwrap! (contract-call? .bxl-vault-v2 withdraw-update request-id u0 u0)
+          (unwrap!
+            (contract-call? .bxl-vault-v2 withdraw-update request-id u0 u0)
             (err u1011)
           )
           (asserts! (is-eq (get-bxl-btc user) (+ bxl sats)) (err u1012))
@@ -475,7 +471,8 @@
             )
             (err u1304)
           )
-          (unwrap! (contract-call? .bxl-vault-v2 withdraw-update request-id u0 u0)
+          (unwrap!
+            (contract-call? .bxl-vault-v2 withdraw-update request-id u0 u0)
             (err u1305)
           )
           (ok true)
@@ -519,8 +516,9 @@
         (asserts!
           (is-eq
             (contract-call? .bxl-vault-v2 admin-sbtc-transfer amount tx-sender
-              (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee)
-            )
+              (list
+                .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee
+              ))
             (err u500)
           )
           (err u1501)
@@ -557,8 +555,9 @@
         )
         (unwrap!
           (contract-call? .bxl-vault-v2 admin-sbtc-transfer sats admin
-            (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee)
-          )
+            (list
+              .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee
+            ))
           (err u1602)
         )
         (asserts! (is-eq (get-vault-sbtc) vault-sbtc) (err u1603))
@@ -580,8 +579,9 @@
       (asserts!
         (is-eq
           (contract-call? .bxl-vault-v2 admin-sbtc-transfer amount tx-sender
-            (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee)
-          )
+            (list
+              .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee
+            ))
           (err u401)
         )
         (err u1701)
@@ -642,7 +642,10 @@
       request (and
         (> request-id u0)
         (<= request-id last)
-        (is-eq (contract-call? .bxl-vault-v2 get-withdrawal-request-id (get user request))
+        (is-eq
+          (contract-call? .bxl-vault-v2 get-withdrawal-request-id
+            (get user request)
+          )
           (some request-id)
         )
       )
