@@ -66,13 +66,6 @@ export function getSbtcBalance(user: string) {
 }
 
 /**
- * Get STX balance for a user
- */
-export function getStxBalance(user: string) {
-  return simnet.getAssetsMap().get(user)?.STX || 0n;
-}
-
-/**
  * Check token metadata for bxlBTC
  */
 export function getBxlBtcMetadata() {

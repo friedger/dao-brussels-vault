@@ -73,13 +73,18 @@ export function withdrawStx(amount: number, user: string) {
 }
 
 /**
- * Admin transfer of surplus sBTC
+ * Admin transfer of surplus sBTC; `pools` lists every pool holding principal
  */
-export function adminSbtcTransfer(amount: number, recipient: string, admin: string) {
+export function adminSbtcTransfer(
+  amount: number,
+  recipient: string,
+  admin: string,
+  pools: string[] = []
+) {
   return simnet.callPublicFn(
     "bxl-vault-v2",
     "admin-sbtc-transfer",
-    [Cl.uint(amount), Cl.principal(recipient)],
+    [Cl.uint(amount), Cl.principal(recipient), Cl.list(pools.map((p) => Cl.principal(p)))],
     admin
   );
 }
@@ -87,11 +92,16 @@ export function adminSbtcTransfer(amount: number, recipient: string, admin: stri
 /**
  * Admin transfer of surplus STX
  */
-export function adminStxTransfer(amount: number, recipient: string, admin: string) {
+export function adminStxTransfer(
+  amount: number,
+  recipient: string,
+  admin: string,
+  pools: string[] = []
+) {
   return simnet.callPublicFn(
     "bxl-vault-v2",
     "admin-stx-transfer",
-    [Cl.uint(amount), Cl.principal(recipient)],
+    [Cl.uint(amount), Cl.principal(recipient), Cl.list(pools.map((p) => Cl.principal(p)))],
     admin
   );
 }

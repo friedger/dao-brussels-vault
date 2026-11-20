@@ -55,13 +55,14 @@ Esbee is the preferred pool: no fees today and a DAO that its members, including
 
 ## Switching pools and booking withdrawals
 
-The admin allowlists an adapter with `admin-set-pool`, then calls `enroll` with that adapter and an amount. To switch, the admin withdraws from one adapter and enrolls into another; users notice nothing.
+The admin allowlists an adapter with `admin-set-pool`, then calls `deploy` with that adapter and an amount. To switch, the admin withdraws from one adapter and deploys into another; users notice nothing.
 
 ```
-bxl-vault-v2 --enroll: sBTC + STX--> adapter --deposit--> pool
+bxl-vault-v2 --deploy: sBTC + STX--> adapter --deposit--> pool
 bxl-vault-v2 <--pool-withdrawn----- adapter <--principal, rewards-- pool
 ```
 
-- **Every transfer is checked.** `enroll`, `collect-rewards` and `pool-withdrawn` compare the vault's sBTC and STX balances before and after; any difference from the stated amount fails the call (error u504).
+- **Every transfer is checked.** `deploy`, `collect-rewards` and `pool-withdrawn` compare the vault's sBTC and STX balances before and after; any difference from the stated amount fails the call (error u504).
 - **Withdrawals are pulled.** The adapter calls `pool-withdrawn` with the amounts it hands over and what it still has in the pool, read from the pool's own records. The vault takes the funds and sets the booked principal to that remaining amount, never higher than before.
 - **Third parties can't distort the books.** Anyone can claim rewards or principal for the adapter, or send it sBTC. Whatever is not principal still in the pool ends up as surplus the admin can move, so nothing is counted twice or lost.
+- **Admin transfers only take the surplus.** `admin-sbtc-transfer` and `admin-stx-transfer` count as owed all bxlBTC, the bxlBTC in open withdrawal requests, and all bxlSTX. The admin passes every adapter that holds deployed principal (each once, error u505 if one is missing, u506 if one repeats); each counts at its booked principal or at its `get-value`, whichever is lower, so a loss in a pool (such as the stBTC exit fee) counts before it is realised. `deploy` itself does not check coverage, so entering a pool with an exit fee lowers it by that fee; see [invariants.md](invariants.md).

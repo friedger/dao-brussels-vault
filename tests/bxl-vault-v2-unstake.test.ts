@@ -46,7 +46,7 @@ const currentCycle = () => num(readPox("current-pox-reward-cycle"));
 const cycleStart = (cycle: number) =>
   num(readPox("reward-cycle-to-burn-height", [Cl.uint(cycle)]));
 const stxAccount = (who: string) =>
-  Cl.deserialize(simnet.runSnippet(`(stx-account '${who})`) as string) as any;
+  simnet.execute(`(stx-account '${who})`).result as any;
 const lockedStx = (who: string) => Number(stxAccount(who).value.locked.value);
 const sbtcBalance = (who: string) =>
   num(
@@ -193,7 +193,7 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
   }
 
   /** Esbee pool on bond 2 with the vault's adapter as its only member. */
-  function enrollIntoBond() {
+  function deployIntoBond() {
     registerSigner();
     const bondStart = num(
       readPox("bond-period-to-burn-height", [Cl.uint(BOND_INDEX)])
@@ -251,7 +251,7 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
     ).toBeOk(Cl.bool(true));
     expect(
       call(
-        "enroll",
+        "deploy",
         [Cl.principal(esbeeAdapter), Cl.uint(SATS), Cl.uint(ustx)],
         deployer
       ).result
@@ -315,7 +315,7 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
     call("admin-set-pool", [Cl.principal(esbeeAdapter), Cl.bool(true)], deployer);
     expect(
       call(
-        "enroll",
+        "deploy",
         [Cl.principal(esbeeAdapter), Cl.uint(SATS), Cl.uint(ustx)],
         deployer
       ).result
@@ -344,7 +344,7 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
   });
 
   test("while bonded, withdraw-finalize works after unstake-sbtc-early and the adapter withdraw", () => {
-    const { ustx } = enrollIntoBond();
+    const { ustx } = deployIntoBond();
     avoidPreparePhase();
 
     expect(
@@ -393,7 +393,7 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
   });
 
   test("principal and sBTC that third parties push to the adapter are booked right", () => {
-    const { ustx } = enrollIntoBond();
+    const { ustx } = deployIntoBond();
     avoidPreparePhase();
     expect(
       simnet.callPublicFn(
@@ -427,15 +427,23 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
     // from the pool's records: the sats left the bond, the STX leg did not.
     expect(poolWithdraw(esbeeAdapter, SATS)).toEqual({ sats: SATS + 500, ustx: 0 });
     expect(
-      simnet.callReadOnlyFn(VAULT, "get-enrolled", [], deployer).result
+      simnet.callReadOnlyFn(VAULT, "get-deployed", [], deployer).result
     ).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(ustx) });
     // The pushed 500 sats are surplus, nothing more.
     expect(
-      call("admin-sbtc-transfer", [Cl.uint(501), Cl.principal(deployer)], deployer)
+      call(
+        "admin-sbtc-transfer",
+        [Cl.uint(501), Cl.principal(deployer), Cl.list([Cl.principal(esbeeAdapter)])],
+        deployer
+      )
         .result
     ).toBeErr(Cl.uint(500));
     expect(
-      call("admin-sbtc-transfer", [Cl.uint(500), Cl.principal(deployer)], deployer)
+      call(
+        "admin-sbtc-transfer",
+        [Cl.uint(500), Cl.principal(deployer), Cl.list([Cl.principal(esbeeAdapter)])],
+        deployer
+      )
         .result
     ).toBeOk(Cl.bool(true));
   });
@@ -443,7 +451,7 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
   // v-bond-1 skips the pox-5 call when no sats are bonded, so the pool
   // winds down after a full early exit (the unreleased main branch does not).
   test("after a full early exit, the STX leg comes back at the end of the bond", () => {
-    const { ustx } = enrollIntoBond();
+    const { ustx } = deployIntoBond();
     avoidPreparePhase();
     simnet.callPublicFn(
       "bxl-pool-esbee",
@@ -474,13 +482,13 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
       Cl.bool(true)
     );
     expect(
-      simnet.callReadOnlyFn(VAULT, "get-enrolled", [], deployer).result
+      simnet.callReadOnlyFn(VAULT, "get-deployed", [], deployer).result
     ).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(0) });
   });
 
 
   test("at the end of the bond, sBTC and the STX leg both come back", () => {
-    const { ustx } = enrollIntoBond();
+    const { ustx } = deployIntoBond();
     const live: any = cvToValue(
       simnet.callReadOnlyFn("bond-staker", "get-live-epoch", [], deployer)
         .result,
@@ -519,7 +527,7 @@ describe("sBTC withdrawal after the admin leaves the bond", () => {
       Cl.bool(true)
     );
     expect(
-      simnet.callReadOnlyFn(VAULT, "get-enrolled", [], deployer).result
+      simnet.callReadOnlyFn(VAULT, "get-deployed", [], deployer).result
     ).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(0) });
   });
 });

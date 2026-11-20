@@ -16,6 +16,31 @@
   (ok (var-set cheat mode))
 )
 
+;; Sats of the position that are lost but not yet realised, as an exit fee or
+;; a slash would be.
+(define-data-var loss uint u0)
+
+(define-public (set-loss (sats uint))
+  (ok (var-set loss sats))
+)
+
+(define-read-only (get-loss)
+  (var-get loss)
+)
+
+;; The loss takes the value down to zero, not below.
+(define-read-only (get-value)
+  (let ((held (- (get-sbtc-balance) (var-get rewards))))
+    (ok {
+      sats: (if (> held (var-get loss))
+        (- held (var-get loss))
+        u0
+      ),
+      ustx: (stx-get-balance current-contract),
+    })
+  )
+)
+
 (define-public (deposit
     (sats uint)
     (ustx uint)
@@ -81,7 +106,7 @@
   )
 )
 
-(define-private (get-sbtc-balance)
+(define-read-only (get-sbtc-balance)
   (unwrap-panic (contract-call? 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token
     get-balance current-contract
   ))

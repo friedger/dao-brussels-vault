@@ -5,6 +5,8 @@
 (define-fungible-token bxl-btc)
 (define-fungible-token bxl-btc-transit)
 
+(define-constant DEPLOYER tx-sender)
+
 (define-data-var vault (optional principal) none)
 
 (define-public (transfer
@@ -37,6 +39,16 @@
 
 (define-read-only (get-total-supply)
   (ok (ft-get-supply bxl-btc))
+)
+
+;; bxl-btc locked in open withdrawal requests; the vault still owes it.
+(define-read-only (get-transit-supply)
+  (ok (ft-get-supply bxl-btc-transit))
+)
+
+;; bxl-btc of `who` locked in their open withdrawal request.
+(define-read-only (get-transit-balance (who principal))
+  (ok (ft-get-balance bxl-btc-transit who))
 )
 
 (define-read-only (get-token-uri)
@@ -88,9 +100,10 @@
   (is-eq contract-caller (unwrap! (var-get vault) false))
 )
 
-;; can be called only once
+;; can be called only once, by the deployer
 (define-public (set-vault (blx-vault principal))
   (begin
+    (asserts! (is-eq tx-sender DEPLOYER) err-unauthorized)
     (asserts! (is-none (var-get vault)) err-forbidden)
     (var-set vault (some blx-vault))
     (ok true)

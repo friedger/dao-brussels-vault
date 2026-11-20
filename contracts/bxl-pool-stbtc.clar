@@ -144,6 +144,21 @@
   (+ (get-position) (get-sbtc-balance))
 )
 
+;; What the position is worth if it left now, for the vault's collateral
+;; checks: stBTC at today's ratio less the higher of StackingDAO's two exit
+;; fees, plus queued withdrawals (already net of their fee), plus sBTC waiting
+;; here to be forwarded.
+(define-read-only (get-value)
+  (let ((sats (stbtc-to-sats (get-stbtc-balance))))
+    (ok {
+      sats: (+ (- sats (/ (* sats (get-exit-fee)) BPS)) (var-get queued-sats)
+        (get-sbtc-balance)
+      ),
+      ustx: u0,
+    })
+  )
+)
+
 ;; Principal still with StackingDAO: stBTC at today's ratio plus queued
 ;; withdrawals. Rewards are in the ratio; nothing is paid here.
 (define-read-only (get-position)
@@ -151,6 +166,32 @@
 )
 
 ;; private functions
+
+;; Fee in basis points: the queued withdrawal fee or, unless this adapter is
+;; exempt, the idle withdrawal fee, whichever is higher.
+(define-private (get-exit-fee)
+  (let (
+      (queued-fee (contract-call?
+        'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1
+        get-withdraw-fee
+      ))
+      (idle-fee (if (contract-call?
+          'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1
+          is-fee-exempt current-contract
+        )
+        u0
+        (contract-call?
+          'SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1
+          get-withdraw-idle-fee
+        )
+      ))
+    )
+    (if (> queued-fee idle-fee)
+      queued-fee
+      idle-fee
+    )
+  )
+)
 
 (define-private (is-vault-admin)
   (contract-call? .bxl-vault-v2 is-admin tx-sender)

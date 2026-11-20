@@ -67,8 +67,19 @@ const poolWithdraw = (pool: string, sats: number) => {
 const stxBalance = (who: string) =>
   Number(simnet.getAssetsMap().get("STX")?.get(who) ?? 0n);
 
-const enrolled = () =>
-  simnet.callReadOnlyFn(VAULT, "get-enrolled", [], deployer).result;
+const deployed = () =>
+  simnet.callReadOnlyFn(VAULT, "get-deployed", [], deployer).result;
+
+const sbtcTransfer = (amount: number, pools: string[]) =>
+  call(
+    "admin-sbtc-transfer",
+    [
+      Cl.uint(amount),
+      Cl.principal(deployer),
+      Cl.list(pools.map((p) => Cl.principal(p))),
+    ],
+    deployer
+  );
 
 const approveMockPool = () =>
   expect(
@@ -148,30 +159,30 @@ describe("bxl-vault-v2 user mechanics (unchanged from v1)", () => {
 });
 
 describe("bxl-vault-v2 sBTC pools", () => {
-  test("only the admin enrolls, and only into approved pools", () => {
+  test("only the admin deploys, and only into approved pools", () => {
     call("deposit", [Cl.uint(10_000)], wallet1);
     const args = [Cl.principal(mockPool), Cl.uint(5_000), Cl.uint(0)];
-    expect(call("enroll", args, wallet1).result).toBeErr(Cl.uint(401));
-    expect(call("enroll", args, deployer).result).toBeErr(Cl.uint(502));
+    expect(call("deploy", args, wallet1).result).toBeErr(Cl.uint(401));
+    expect(call("deploy", args, deployer).result).toBeErr(Cl.uint(502));
     approveMockPool();
-    expect(call("enroll", args, deployer).result).toBeOk(Cl.bool(true));
+    expect(call("deploy", args, deployer).result).toBeOk(Cl.bool(true));
     expect(sbtcBalance(mockPool)).toBe(5_000);
-    expect(enrolled()).toBeTuple({ sats: Cl.uint(5_000), ustx: Cl.uint(0) });
+    expect(deployed()).toBeTuple({ sats: Cl.uint(5_000), ustx: Cl.uint(0) });
   });
 
-  test("enroll sends the STX leg as well", () => {
+  test("deploy sends the STX leg as well", () => {
     call("deposit", [Cl.uint(10_000)], wallet1);
     call("deposit-stx", [Cl.uint(3_000_000)], wallet2);
     approveMockPool();
     expect(
       call(
-        "enroll",
+        "deploy",
         [Cl.principal(mockPool), Cl.uint(10_000), Cl.uint(3_000_000)],
         deployer
       ).result
     ).toBeOk(Cl.bool(true));
     expect(stxBalance(mockPool)).toBe(3_000_000);
-    expect(enrolled()).toBeTuple({
+    expect(deployed()).toBeTuple({
       sats: Cl.uint(10_000),
       ustx: Cl.uint(3_000_000),
     });
@@ -180,10 +191,10 @@ describe("bxl-vault-v2 sBTC pools", () => {
   test("pool principal counts towards the collateral check", () => {
     call("deposit", [Cl.uint(10_000)], wallet1);
     approveMockPool();
-    call("enroll", [Cl.principal(mockPool), Cl.uint(8_000), Cl.uint(0)], deployer);
+    call("deploy", [Cl.principal(mockPool), Cl.uint(8_000), Cl.uint(0)], deployer);
     // Nothing above what users are owed.
     expect(
-      call("admin-sbtc-transfer", [Cl.uint(1), Cl.principal(deployer)], deployer)
+      sbtcTransfer(1, [mockPool])
         .result
     ).toBeErr(Cl.uint(500));
   });
@@ -191,7 +202,7 @@ describe("bxl-vault-v2 sBTC pools", () => {
   test("rewards land in the vault as surplus", () => {
     call("deposit", [Cl.uint(10_000)], wallet1);
     approveMockPool();
-    call("enroll", [Cl.principal(mockPool), Cl.uint(10_000), Cl.uint(0)], deployer);
+    call("deploy", [Cl.principal(mockPool), Cl.uint(10_000), Cl.uint(0)], deployer);
     simnet.callPublicFn(
       "mock-sbtc-pool",
       "add-sbtc",
@@ -204,7 +215,7 @@ describe("bxl-vault-v2 sBTC pools", () => {
     ).toBeOk(Cl.uint(300));
     expect(sbtcBalance(vaultId)).toBe(300);
     expect(
-      call("admin-sbtc-transfer", [Cl.uint(300), Cl.principal(deployer)], deployer)
+      sbtcTransfer(300, [mockPool])
         .result
     ).toBeOk(Cl.bool(true));
   });
@@ -214,7 +225,7 @@ describe("bxl-vault-v2 sBTC pools", () => {
     call("deposit-stx", [Cl.uint(1_000_000)], wallet1);
     approveMockPool();
     call(
-      "enroll",
+      "deploy",
       [Cl.principal(mockPool), Cl.uint(10_000), Cl.uint(1_000_000)],
       deployer
     );
@@ -229,13 +240,13 @@ describe("bxl-vault-v2 sBTC pools", () => {
     ).toEqual({ sats: 4_000, ustx: 1_000_000 });
     // The record follows what the pool still holds (6,000 + 200 growth),
     // never above what went in.
-    expect(enrolled()).toBeTuple({ sats: Cl.uint(6_200), ustx: Cl.uint(0) });
+    expect(deployed()).toBeTuple({ sats: Cl.uint(6_200), ustx: Cl.uint(0) });
 
     // The rest, with the 200 sats of growth.
     expect(
       poolWithdraw(mockPool, 100_000)
     ).toEqual({ sats: 6_200, ustx: 0 });
-    expect(enrolled()).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(0) });
+    expect(deployed()).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(0) });
     expect(sbtcBalance(vaultId)).toBe(10_200);
 
     // a withdrawal can be paid again
@@ -249,30 +260,30 @@ describe("bxl-vault-v2 sBTC pools", () => {
   test("pool-withdrawn only lowers the caller's own principal", () => {
     call("deposit", [Cl.uint(1_000)], wallet1);
     approveMockPool();
-    call("enroll", [Cl.principal(mockPool), Cl.uint(1_000), Cl.uint(0)], deployer);
+    call("deploy", [Cl.principal(mockPool), Cl.uint(1_000), Cl.uint(0)], deployer);
     expect(
       call("pool-withdrawn", [Cl.uint(1_000), Cl.uint(0), Cl.uint(0), Cl.uint(0)], deployer)
         .result
     ).toBeErr(Cl.uint(404));
-    expect(enrolled()).toBeTuple({ sats: Cl.uint(1_000), ustx: Cl.uint(0) });
+    expect(deployed()).toBeTuple({ sats: Cl.uint(1_000), ustx: Cl.uint(0) });
   });
 
-  test("enroll fails when the adapter sends anything back", () => {
+  test("deploy fails when the adapter sends anything back", () => {
     call("deposit", [Cl.uint(10_000)], wallet1);
     approveMockPool();
     simnet.callPublicFn("mock-sbtc-pool", "add-sbtc", [Cl.uint(1), Cl.uint(0)], wallet2);
     simnet.callPublicFn("mock-sbtc-pool", "set-cheat", [Cl.uint(1)], wallet2);
     expect(
-      call("enroll", [Cl.principal(mockPool), Cl.uint(5_000), Cl.uint(0)], deployer)
+      call("deploy", [Cl.principal(mockPool), Cl.uint(5_000), Cl.uint(0)], deployer)
         .result
     ).toBeErr(Cl.uint(504));
-    expect(enrolled()).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(0) });
+    expect(deployed()).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(0) });
   });
 
   test("collect-rewards fails when the adapter reports more than it sends", () => {
     call("deposit", [Cl.uint(10_000)], wallet1);
     approveMockPool();
-    call("enroll", [Cl.principal(mockPool), Cl.uint(10_000), Cl.uint(0)], deployer);
+    call("deploy", [Cl.principal(mockPool), Cl.uint(10_000), Cl.uint(0)], deployer);
     simnet.callPublicFn("mock-sbtc-pool", "add-sbtc", [Cl.uint(0), Cl.uint(300)], wallet2);
     simnet.callPublicFn("mock-sbtc-pool", "set-cheat", [Cl.uint(2)], wallet2);
     expect(
@@ -281,10 +292,62 @@ describe("bxl-vault-v2 sBTC pools", () => {
     expect(sbtcBalance(vaultId)).toBe(0);
   });
 
+  test("open withdrawal requests count as owed", () => {
+    call("deposit", [Cl.uint(1_000)], wallet1);
+    call("withdraw-request", [Cl.uint(1_000), Cl.uint(1000)], wallet1);
+    // All bxl-btc is in transit; the sBTC behind it is still owed.
+    expect(sbtcTransfer(1, []).result).toBeErr(Cl.uint(500));
+    simnet.callPublicFn(
+      SBTC,
+      "transfer",
+      [Cl.uint(10), Cl.principal(wallet2), Cl.principal(vaultId), Cl.none()],
+      wallet2
+    );
+    expect(sbtcTransfer(11, []).result).toBeErr(Cl.uint(500));
+    expect(sbtcTransfer(10, []).result).toBeOk(Cl.bool(true));
+    simnet.mineEmptyBurnBlocks(1001);
+    expect(call("withdraw-finalize", [Cl.uint(1)], wallet1).result).toBeOk(
+      Cl.uint(1_000)
+    );
+  });
+
+  test("admin transfers must list every pool with principal, once", () => {
+    call("deposit", [Cl.uint(10_000)], wallet1);
+    approveMockPool();
+    call("deploy", [Cl.principal(mockPool), Cl.uint(5_000), Cl.uint(0)], deployer);
+    expect(sbtcTransfer(1, []).result).toBeErr(Cl.uint(505));
+    expect(sbtcTransfer(1, [mockPool, mockPool]).result).toBeErr(Cl.uint(506));
+    // complete: passes the pool check, then finds no surplus
+    expect(sbtcTransfer(1, [mockPool]).result).toBeErr(Cl.uint(500));
+    expect(
+      call(
+        "admin-stx-transfer",
+        [Cl.uint(1), Cl.principal(deployer), Cl.list([])],
+        deployer
+      ).result
+    ).toBeErr(Cl.uint(505));
+  });
+
+  test("a loss in a pool counts before it is realised", () => {
+    call("deposit", [Cl.uint(10_000)], wallet1);
+    approveMockPool();
+    call("deploy", [Cl.principal(mockPool), Cl.uint(10_000), Cl.uint(0)], deployer);
+    // 300 sats of yield reach the vault, but the pool position lost 200.
+    simnet.callPublicFn(
+      SBTC,
+      "transfer",
+      [Cl.uint(300), Cl.principal(wallet2), Cl.principal(vaultId), Cl.none()],
+      wallet2
+    );
+    simnet.callPublicFn("mock-sbtc-pool", "set-loss", [Cl.uint(200)], wallet2);
+    expect(sbtcTransfer(101, [mockPool]).result).toBeErr(Cl.uint(500));
+    expect(sbtcTransfer(100, [mockPool]).result).toBeOk(Cl.bool(true));
+  });
+
   test("a disabled pool can still be emptied", () => {
     call("deposit", [Cl.uint(1_000)], wallet1);
     approveMockPool();
-    call("enroll", [Cl.principal(mockPool), Cl.uint(1_000), Cl.uint(0)], deployer);
+    call("deploy", [Cl.principal(mockPool), Cl.uint(1_000), Cl.uint(0)], deployer);
     call("admin-set-pool", [Cl.principal(mockPool), Cl.bool(false)], deployer);
     expect(
       poolWithdraw(mockPool, 1_000)
@@ -337,7 +400,7 @@ describe("pool adapters", () => {
     call("admin-set-pool", [Cl.principal(stbtcPool), Cl.bool(true)], deployer);
     expect(
       call(
-        "enroll",
+        "deploy",
         [Cl.principal(stbtcPool), Cl.uint(50_000), Cl.uint(0)],
         deployer
       ).result
@@ -346,6 +409,10 @@ describe("pool adapters", () => {
       simnet.callReadOnlyFn("bxl-pool-stbtc", "get-sbtc-value", [], deployer)
         .result
     ).toBeUint(50_000);
+    // For the collateral checks it counts net of the 1% idle exit fee.
+    expect(
+      simnet.callReadOnlyFn("bxl-pool-stbtc", "get-value", [], deployer).result
+    ).toBeOk(Cl.tuple({ sats: Cl.uint(49_500), ustx: Cl.uint(0) }));
 
     // Instant withdrawal from the idle reserve costs the 1% idle fee.
     expect(
@@ -360,7 +427,27 @@ describe("pool adapters", () => {
       deployer
     ).result;
     expect(left).toBeUint(40_028);
-    expect(enrolled()).toBeTuple({ sats: left, ustx: Cl.uint(0) });
+    expect(deployed()).toBeTuple({ sats: left, ustx: Cl.uint(0) });
+  });
+});
+
+describe("admins", () => {
+  const setAdmin = (who: string, enable: boolean, sender: string) =>
+    call("admin-set-admin", [Cl.principal(who), Cl.bool(enable)], sender).result;
+
+  test("there is always at least one admin", () => {
+    // the only admin cannot step down
+    expect(setAdmin(deployer, false, deployer)).toBeErr(Cl.uint(403));
+    expect(setAdmin(wallet1, true, deployer)).toBeOk(Cl.bool(true));
+    // enabling an admin twice does not count twice
+    expect(setAdmin(wallet1, true, deployer)).toBeOk(Cl.bool(true));
+    // with two admins, one may step down or remove the other
+    expect(setAdmin(deployer, false, deployer)).toBeOk(Cl.bool(true));
+    expect(setAdmin(deployer, false, wallet1)).toBeOk(Cl.bool(true));
+    expect(setAdmin(wallet1, false, wallet1)).toBeErr(Cl.uint(403));
+    expect(setAdmin(wallet2, false, wallet1)).toBeOk(Cl.bool(true));
+    expect(setAdmin(wallet1, false, wallet1)).toBeErr(Cl.uint(403));
+    expect(setAdmin(wallet2, true, deployer)).toBeErr(Cl.uint(401));
   });
 });
 

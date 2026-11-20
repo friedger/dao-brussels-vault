@@ -16,7 +16,7 @@ Verified on mainnet on 2026-10-08:
 | Dual Stacking `enroll` calls since October | every one aborts |
 | Last Fast Pool v2 STX payout | 2026-08-11 |
 
-What breaks in `contracts/bxl-vault.clar`:
+What breaks in `v1/contracts/bxl-vault.clar`:
 
 - `delegate-stx` calls `pox4-multi-pool-v1 delegate-stx`. pox-5 has no delegation at all. There is no `delegate-stx`, no `allow-contract-caller`, no `revoke-delegate-stx`.
 - `revoke-delegate-stx` calls `pox-4`, which is inactive.
@@ -199,14 +199,14 @@ Principles: keep the user-facing API byte-compatible (`deposit`, `withdraw-reque
 
 | Function | v1 | v2 |
 |---|---|---|
-| `enroll` | dual-stacking enroll, anyone | admin only: `(enroll (pool <sbtc-pool-trait>) (amount uint))`, moves `amount` sBTC (and, for bond pools, the STX leg) to an allowlisted adapter and records it in a `pool-deposits` map |
-| new `pool-withdrawn` | | called by an adapter (from `as-contract?`) when the admin runs the adapter's `withdraw`; the vault pulls the sBTC and STX itself, checks its balance before and after, and sets that pool's recorded principal to the position the adapter reads from the pool's own books (never higher than before), so sBTC that third parties push to the adapter is booked correctly. There is no `unenroll`: funds come back through the adapter. `enroll` and `collect-rewards` check the vault's balance before and after the adapter call too (`err u504`) |
+| `enroll` → `deploy` | dual-stacking enroll, anyone | admin only: `(deploy (pool <sbtc-pool-trait>) (sats uint) (ustx uint))`, moves `sats` sBTC and `ustx` STX (the STX leg of bond pools) to an allowlisted adapter and records it in the `pool-principal` map |
+| new `pool-withdrawn` | | called by an adapter (from `as-contract?`) when the admin runs the adapter's `withdraw`; the vault pulls the sBTC and STX itself, checks its balance before and after, and sets that pool's recorded principal to the position the adapter reads from the pool's own books (never higher than before), so sBTC that third parties push to the adapter is booked correctly. There is no `undeploy`: funds come back through the adapter. `deploy` and `collect-rewards` check the vault's balance before and after the adapter call too (`err u504`) |
 | new `collect-rewards` | | anyone: `(collect-rewards (pool <sbtc-pool-trait>))` |
 | new `admin-set-pool` | | allowlist or deny an adapter principal |
 | `delegate-stx` → `stake` | pox4-multi-pool delegate | admin: `(stake (manager <signer-manager-trait>) (amount uint) (cycles uint))`, calls `pox-5 stake` inside `(as-contract? ((with-staking amount) (with-pox)) ...)` with `signer-calldata none`; manager must be in an admin allowlist |
 | new `stake-update` | | admin: `stake-update` wrapper |
 | `revoke-delegate-stx` → `unstake` | pox-4 revoke | admin: `(unstake (manager <signer-manager-trait>))`, calls `pox-5 unstake` |
-| `admin-sbtc-transfer` | `sbtc-balance >= amount + supply` | `free-sbtc + sum(pool get-sbtc-value) >= amount + supply`, over the adapters passed as a list of traits |
+| `admin-sbtc-transfer` | `sbtc-balance >= amount + supply` | `free-sbtc + sum(min(principal, pool get-value)) >= amount + supply + transit-supply`, over the adapters passed as a list of traits (each once, all with principal) |
 | `admin-stx-transfer` | `stx-balance >= amount + supply` | counts STX held by bond adapters as well |
 | `withdraw-finalize` | pays from vault balance | unchanged; if free sBTC is short the admin first calls the adapter's `withdraw` |
 | deploy-time init | pox-4 `allow-contract-caller` | removed |
@@ -226,15 +226,15 @@ Drop the hard-coded `max-stacking-amount` and stake the actual free STX balance,
 
 - Every test in `tests/bxl-vault.test.ts` and `tests/bxl-btc.test.ts` must pass unchanged against the v2 vault.
 - Replace `setupStackingPool` in `tests/vault-helpers.ts` with a helper that registers the local signer manager on simnet pox-5 (`grant-signer-key` + `register-signer`) and mines past the prepare phase.
-- New tests: stake/unstake through the manager; prepare-phase rejection; enroll into the bond adapter before and after `bind-bond`; `commit-rollover` pass-through; collateral check counts pool value; `collect-rewards` moves sBTC into the vault; adapter rejects non-vault callers; `admin-set-pool` gating; stBTC adapter value and idle withdraw.
-- Clarunit flows in `tests-clar/`: update `bxl-vault-stacking_flow_test.clar`.
+- New tests: stake/unstake through the manager; prepare-phase rejection; deploy into the bond adapter before and after `bind-bond`; `commit-rollover` pass-through; collateral check counts pool value; `collect-rewards` moves sBTC into the vault; adapter rejects non-vault callers; `admin-set-pool` gating; stBTC adapter value and idle withdraw.
+- Invariants: fuzzed with Rendezvous, see [invariants.md](invariants.md). The clarunit flows in `tests-clar/` were dropped: the vitest suites cover them.
 
 ### 6.4 Deployment and migration
 
 1. Deploy `bxl-btc-v2`, `bxl-stx-v2`, `sbtc-pool-trait`, the adapters, `bxl-vault-v2` from the same deployer `SPBX1F9B4G87C3R6H4N82RRHBS2Q5523QMDV38QF`.
 2. Admin: `admin-set-pool` for the adapters, `admin-set-manager fastpool-max500-signer-manager true`.
 3. Wind down v1: announce; users call `withdraw-request` on v1, the admin finalizes immediately, users `deposit` into v2 and `withdraw-stx`/`deposit-stx` for STX. v1 history shows a handful of depositors.
-4. Admin on v2: `enroll` the sBTC into the bond adapter before the bond 3 stake window (section 4), keeping a liquid buffer (suggest the larger of 10% or the sum of open withdrawal requests). If Esbee is not allowlisted, use the Xverse lane 3 adapter or stBTC.
+4. Admin on v2: `deploy` the sBTC into the bond adapter before the bond 3 stake window (section 4), keeping a liquid buffer (suggest the larger of 10% or the sum of open withdrawal requests). If Esbee is not allowlisted, use the Xverse lane 3 adapter or stBTC.
 5. Admin on v2: `stake` the remaining free STX for 12 cycles, outside a prepare phase. Cycle 145 reward phase runs from burn block 970,550 to 972,550.
 6. Every six months: `commit-rollover` (Xverse) or nothing (Esbee), `collect-rewards` any time.
 
@@ -247,7 +247,7 @@ All contract knowledge sits in `src/services/blockchain.ts`; nothing in the app 
 3. `src/components/VaultOverviewCards.tsx:35` hard-codes the explorer URL for `bxl-btc`; build it from the constant.
 4. Earned yield (`VaultOverviewCards.tsx`) is `vault sBTC - supply`. Add the pool value: call the vault's new read-only `get-total-sbtc-value` and subtract the supply.
 5. Yield history (`blockchain.ts:521-575`) classifies `distribute-rewards` and `transfer-many`. Add the pool's `claim-rewards` and the manager's `claim-staker-rewards`/`payout` transfers.
-6. Admin page: `delegate-stx` becomes `stake` and `revoke-delegate-stx` becomes `unstake`; `enroll`, `stake` and `unstake` take the pool or manager and amounts as arguments. Add buttons for the adapters' `withdraw`, `stake-update`, `collect-rewards`, `commit-rollover`, and a "claim pool rewards" button that calls the signer manager's `claim-staker-rewards` with the vault as staker. `stake` locks STX, so give it a stacking post condition or `postConditionMode: "allow"`, and bump `@stacks/transactions` to 7.6.
+6. Admin page: `delegate-stx` becomes `stake` and `revoke-delegate-stx` becomes `unstake`; `deploy`, `stake` and `unstake` take the pool or manager and amounts as arguments. Add buttons for the adapters' `withdraw`, `stake-update`, `collect-rewards`, `commit-rollover`, and a "claim pool rewards" button that calls the signer manager's `claim-staker-rewards` with the vault as staker. `stake` locks STX, so give it a stacking post condition or `postConditionMode: "allow"`, and bump `@stacks/transactions` to 7.6.
 7. Copy in `Admin.tsx`, `VaultHowItWorksCard.tsx`, `FAQSection.tsx`, `VaultDetails.tsx` and the tutorial steps still describes Dual Stacking and Fast Pool v2.
 8. `VaultDetails.tsx:34` shows locked STX from Hiro's `stx.locked`. Verify Hiro reports pox-5 locks there; unverified so far. Fallback: read `pox-5 get-staker-info` for the vault.
 9. Old history: `useTransactions(VAULT_CONTRACT)` will only show v2. Query both vault IDs if the accumulated yield chart should keep v1 numbers.

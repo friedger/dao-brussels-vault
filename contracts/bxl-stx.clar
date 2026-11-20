@@ -4,6 +4,8 @@
 
 (define-fungible-token bxl-stx)
 
+(define-constant DEPLOYER tx-sender)
+
 (define-data-var vault (optional principal) none)
 
 (define-public (transfer
@@ -64,9 +66,10 @@
   (is-eq contract-caller (unwrap! (var-get vault) false))
 )
 
-;; can be called only once
+;; can be called only once, by the deployer
 (define-public (set-vault (blx-vault principal))
   (begin
+    (asserts! (is-eq tx-sender DEPLOYER) err-unauthorized)
     (asserts! (is-none (var-get vault)) err-forbidden)
     (var-set vault (some blx-vault))
     (ok true)

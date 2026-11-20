@@ -1,0 +1,71 @@
+[project]
+name = "dao-brussels-vault-v1"
+description = ""
+authors = []
+telemetry = true
+cache_dir = "../.cache"
+requirements = [
+    {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token"},
+    {contract_id = "SP1HFCRKEJ8BYW4D0E3FAWHFDX8A25PPAA83HWWZ9.dual-stacking-v1"},
+    {contract_id = "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.pox4-multi-pool-v1"}
+]
+
+[contracts.bxl-btc]
+path = "contracts/bxl-btc.clar"
+clarity = "4"
+epoch = "3.3"
+
+
+[contracts.bxl-stx]
+path = "contracts/bxl-stx.clar"
+clarity = "4"
+epoch = "3.3"
+
+[contracts.bxl-vault]
+path = "contracts/bxl-vault.clar"
+clarity = "4"
+epoch = "3.3"
+
+## Tests
+[contracts.bxl-vault_test]
+path = "tests-clar/bxl-vault_test.clar"
+clarity = "4"
+epoch = "3.3"
+
+[contracts.bxl-vault-enroll_test]
+path = "tests-clar/bxl-vault-enroll_test.clar"
+clarity = "4"
+epoch = "3.3"
+
+[contracts.bxl-vault-stacking_flow_test]
+path = "tests-clar/bxl-vault-stacking_flow_test.clar"
+clarity = "4"
+epoch = "3.3"
+
+[contracts.bxl-vault-admin_flow_test]
+path = "tests-clar/bxl-vault-admin_flow_test.clar"
+clarity = "4"
+epoch = "3.3"
+
+[contracts.bxl-vault-new-admin_flow_test]
+path = "tests-clar/bxl-vault-new-admin_flow_test.clar"
+clarity = "4"
+epoch = "3.3"
+
+
+[repl.analysis]
+passes = ["check_checker"]
+check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
+
+#[repl.remote_data]
+#enabled = true
+#initial_height = 4653800
+#api_url = "http://localhost:3999"
+
+# Check-checker settings:
+# trusted_sender: if true, inputs are trusted after tx_sender has been checked.
+# trusted_caller: if true, inputs are trusted after contract-caller has been checked.
+# callee_filter: if true, untrusted data may be passed into a private function without a
+# warning, if it gets checked inside. This check will also propagate up to the
+# caller.
+# More informations: https://www.hiro.so/blog/new-safety-checks-in-clarinet

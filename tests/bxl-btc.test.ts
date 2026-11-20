@@ -78,4 +78,17 @@ describe("BXL-BTC Token Contract", () => {
     );
     expect(response.result).toBeErr(Cl.uint(403)); // forbidden - vault already set
   });
+
+  test.each(["bxl-btc-v2", "bxl-stx-v2"])(
+    "that only the deployer can set the vault of %s",
+    (token) => {
+      const response = simnet.callPublicFn(
+        token,
+        "set-vault",
+        [Cl.principal(wallet1)],
+        wallet1
+      );
+      expect(response.result).toBeErr(Cl.uint(401));
+    }
+  );
 });

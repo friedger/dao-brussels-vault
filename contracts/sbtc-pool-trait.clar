@@ -17,4 +17,14 @@
     ()
     (response uint uint)
   )
+  ;; What the position (pool plus funds waiting in the adapter) is worth now,
+  ;; net of exit fees. The vault counts the lower of this and the recorded
+  ;; principal as held.
+  (get-value
+    ()
+    (response {
+      sats: uint,
+      ustx: uint,
+    } uint)
+  )
 ))

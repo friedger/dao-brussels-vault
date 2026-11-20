@@ -138,6 +138,22 @@
   (contract-call? .bond-staker get-claimable-rewards current-contract)
 )
 
+;; What the position is worth, for the vault's collateral checks: the
+;; principal the pool still holds for this contract plus the sBTC and STX
+;; waiting here.
+(define-read-only (get-value)
+  (let ((position (get-pool-position)))
+    (ok {
+      sats: (+ (get sats position)
+        (unwrap-panic (contract-call? 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token
+          get-balance current-contract
+        ))
+      ),
+      ustx: (+ (get ustx position) (stx-get-balance current-contract)),
+    })
+  )
+)
+
 ;; private functions
 
 (define-private (is-vault-admin)

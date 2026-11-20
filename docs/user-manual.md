@@ -88,7 +88,7 @@ The vault admin is a 3-of-5 multisig of DAO Brussels stewards: any 3 of the 5 ke
 | Stake the vault's STX with a pox-5 signer, and unstake it | Change the 1:1 amount you get back |
 | Finalize a withdrawal before its waiting time is over | Stop a withdrawal once its waiting time is over and the vault holds the sBTC |
 | Send the rewards, the sBTC above what users are owed, to the community | Change the vault's code |
-| Add or remove admins |  |
+| Add or remove admins | Remove the last admin |
 
 ### Where the sBTC goes
 
@@ -163,7 +163,7 @@ You can lose some or all of your BTC, or wait months to get it back. Read each r
 These need an answer before this manual goes to users.
 
 - [ ] Mainnet addresses of `bxl-vault-v2`, the bxlBTC and bxlSTX tokens and the pool adapters. Version 2 is not deployed yet.
-- [ ] The 5 stewards and the multisig address. The deploying key is the first admin and cannot remove itself, so the multisig must remove it after it is added.
+- [ ] The 5 stewards and the multisig address. The deploying key is the first admin; once the multisig is added, the deploying key removes itself (the vault always keeps at least one admin).
 - [ ] An independent audit of version 2 before deposits open.
 - [ ] How much sBTC the stewards keep free in the vault for withdrawals, and their target time to bring sBTC back from a pool on request.
 - [ ] The pool for bond 3, which starts at Bitcoin block 974,750 (early November 2026): Esbee if it gets on the allowlist, otherwise Xverse or stBTC.

@@ -96,30 +96,18 @@ path = "tests/mocks/mock-sbtc-pool.clar"
 clarity_version = 6
 epoch = "4.0"
 
-
-[contracts.bxl-vault_test]
-path = "tests-clar/bxl-vault_test.clar"
+# Rendezvous target: forwards to the vault and the mock pool, holds the
+# invariants (npm run fuzz:invariant).
+[contracts.bxl-vault-v2-rv]
+path = "rendezvous/bxl-vault-v2-rv.clar"
 clarity_version = 6
 epoch = "4.0"
 
-[contracts.bxl-vault-admin_flow_test]
-path = "tests-clar/bxl-vault-admin_flow_test.clar"
-clarity_version = 6
-epoch = "4.0"
-
-[repl.analysis]
-passes = ["check_checker"]
-check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
+[linter]
+include = ["contracts/*.clar"]
+exclude = []
 
 #[repl.remote_data]
 #enabled = true
 #initial_height = 4653800
 #api_url = "http://localhost:3999"
-
-# Check-checker settings:
-# trusted_sender: if true, inputs are trusted after tx_sender has been checked.
-# trusted_caller: if true, inputs are trusted after contract-caller has been checked.
-# callee_filter: if true, untrusted data may be passed into a private function without a
-# warning, if it gets checked inside. This check will also propagate up to the
-# caller.
-# More informations: https://www.hiro.so/blog/new-safety-checks-in-clarinet
