@@ -41,6 +41,16 @@ describe("BXL-BTC Token Contract", () => {
     expect(response.result).toBeErr(Cl.uint(401)); // unauthorized
   });
 
+  test("that non-vault cannot unlock tokens", () => {
+    const response = simnet.callPublicFn(
+      "bxl-btc-v2",
+      "unlock",
+      [Cl.uint(500)],
+      wallet1
+    );
+    expect(response.result).toBeErr(Cl.uint(401));
+  });
+
   test("that non-vault cannot burn tokens", () => {
     // Non-vault tries to burn tokens
     let response = simnet.callPublicFn(
@@ -68,15 +78,64 @@ describe("BXL-BTC Token Contract", () => {
     expect(response.result).toBeErr(Cl.uint(403)); // forbidden
   });
 
-  test("that vault can be set only once", () => {
-    // Try to set vault again (should fail if already set)
-    let response = simnet.callPublicFn(
-      "bxl-btc-v2",
-      "set-vault",
-      [Cl.principal(wallet1)],
-      deployer
+  test.each(["bxl-btc-v2", "bxl-stx-v2"])(
+    "that the vault of %s can be set only once",
+    (token) => {
+      // the vault set itself at deployment
+      const response = simnet.callPublicFn(
+        token,
+        "set-vault",
+        [Cl.principal(wallet1)],
+        deployer
+      );
+      expect(response.result).toBeErr(Cl.uint(403));
+    }
+  );
+
+  test("that transit balances follow a user's open request", () => {
+    const transit = (who: string) =>
+      simnet.callReadOnlyFn(
+        "bxl-btc-v2",
+        "get-transit-balance",
+        [Cl.principal(who)],
+        wallet1
+      ).result;
+    const transitSupply = () =>
+      simnet.callReadOnlyFn("bxl-btc-v2", "get-transit-supply", [], wallet1)
+        .result;
+    const vault = (fn: string, args: any[], who: string) =>
+      simnet.callPublicFn("bxl-vault-v2", fn, args, who).result;
+
+    depositSbtc(1000, wallet1);
+    depositSbtc(1000, wallet2);
+    expect(transit(wallet1)).toBeOk(Cl.uint(0));
+
+    expect(
+      vault("withdraw-request", [Cl.uint(300), Cl.uint(0)], wallet1)
+    ).toBeOk(Cl.uint(1));
+    expect(
+      vault("withdraw-request", [Cl.uint(200), Cl.uint(0)], wallet2)
+    ).toBeOk(Cl.uint(2));
+    expect(transit(wallet1)).toBeOk(Cl.uint(300));
+    expect(transit(wallet2)).toBeOk(Cl.uint(200));
+    expect(transitSupply()).toBeOk(Cl.uint(500));
+    expect(getBxlBtcBalance(wallet1)).toBeOk(Cl.uint(700));
+
+    // lowering the request moves the difference back
+    expect(
+      vault("withdraw-update", [Cl.uint(1), Cl.uint(100), Cl.uint(0)], wallet1)
+    ).toBeOk(Cl.uint(1));
+    expect(transit(wallet1)).toBeOk(Cl.uint(100));
+    expect(getBxlBtcBalance(wallet1)).toBeOk(Cl.uint(900));
+
+    // paying out burns the transit
+    simnet.mineEmptyBurnBlocks(1001);
+    expect(vault("withdraw-finalize", [Cl.uint(1)], wallet1)).toBeOk(
+      Cl.uint(100)
     );
-    expect(response.result).toBeErr(Cl.uint(403)); // forbidden - vault already set
+    expect(transit(wallet1)).toBeOk(Cl.uint(0));
+    expect(transitSupply()).toBeOk(Cl.uint(200));
+    expect(getTotalBxlBtcSupply()).toBeOk(Cl.uint(1700));
   });
 
   test.each(["bxl-btc-v2", "bxl-stx-v2"])(

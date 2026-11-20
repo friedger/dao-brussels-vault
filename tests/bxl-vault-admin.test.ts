@@ -84,5 +84,15 @@ describe("Bxl Btc Vault admin", () => {
 
     response = adminStxTransfer(1, wallet1, wallet1);
     expect(response.result).toBeErr(Cl.uint(401));
+
+    for (const fn of ["admin-set-pool", "admin-set-manager"]) {
+      response = simnet.callPublicFn(
+        "bxl-vault-v2",
+        fn,
+        [Cl.principal(`${deployer}.mock-sbtc-pool`), Cl.bool(true)],
+        wallet1
+      );
+      expect(response.result).toBeErr(Cl.uint(401));
+    }
   });
 });

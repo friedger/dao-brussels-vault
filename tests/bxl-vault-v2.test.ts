@@ -140,6 +140,72 @@ describe("bxl-vault-v2 user mechanics (unchanged from v1)", () => {
     );
   });
 
+  test("request getters follow a request from open to paid", () => {
+    const request = (id: number) =>
+      simnet.callReadOnlyFn(VAULT, "get-withdrawal-request", [Cl.uint(id)], wallet1)
+        .result;
+    const requestId = (who: string) =>
+      simnet.callReadOnlyFn(
+        VAULT,
+        "get-withdrawal-request-id",
+        [Cl.principal(who)],
+        wallet1
+      ).result;
+    const lastId = () =>
+      simnet.callReadOnlyFn(VAULT, "get-last-request-id", [], wallet1).result;
+
+    expect(lastId()).toBeUint(0);
+    expect(request(1)).toBeNone();
+    expect(requestId(wallet1)).toBeNone();
+
+    call("deposit", [Cl.uint(1000)], wallet1);
+    const height = simnet.burnBlockHeight;
+    expect(
+      call("withdraw-request", [Cl.uint(400), Cl.uint(0)], wallet1).result
+    ).toBeOk(Cl.uint(1));
+    expect(lastId()).toBeUint(1);
+    expect(requestId(wallet1)).toBeSome(Cl.uint(1));
+    expect(request(1)).toBeSome(
+      Cl.tuple({
+        user: Cl.principal(wallet1),
+        amount: Cl.uint(400),
+        // a delay below the minimum is raised to it
+        "opens-at": Cl.uint(height + 1000),
+      })
+    );
+
+    simnet.mineEmptyBurnBlocks(1001);
+    call("withdraw-finalize", [Cl.uint(1)], wallet1);
+    expect(request(1)).toBeNone();
+    expect(requestId(wallet1)).toBeNone();
+    // ids are never reused
+    expect(lastId()).toBeUint(1);
+  });
+
+  test("an update with a long delay keeps it", () => {
+    call("deposit", [Cl.uint(1000)], wallet1);
+    call("withdraw-request", [Cl.uint(400), Cl.uint(1000)], wallet1);
+    const height = simnet.burnBlockHeight;
+    expect(
+      call("withdraw-update", [Cl.uint(1), Cl.uint(500), Cl.uint(5000)], wallet1)
+        .result
+    ).toBeOk(Cl.uint(1));
+    expect(
+      simnet.callReadOnlyFn(VAULT, "get-withdrawal-request", [Cl.uint(1)], wallet1)
+        .result
+    ).toBeSome(
+      Cl.tuple({
+        user: Cl.principal(wallet1),
+        amount: Cl.uint(500),
+        "opens-at": Cl.uint(height + 5000),
+      })
+    );
+    simnet.mineEmptyBurnBlocks(1001);
+    expect(call("withdraw-finalize", [Cl.uint(1)], wallet1).result).toBeErr(
+      Cl.uint(401)
+    );
+  });
+
   test("deposit and withdraw STX", () => {
     expect(call("deposit-stx", [Cl.uint(5_000_000)], wallet1).result).toBeOk(
       Cl.bool(true)
@@ -186,6 +252,40 @@ describe("bxl-vault-v2 sBTC pools", () => {
       sats: Cl.uint(10_000),
       ustx: Cl.uint(3_000_000),
     });
+  });
+
+  test("deploy can send the STX leg alone", () => {
+    call("deposit-stx", [Cl.uint(3_000_000)], wallet2);
+    approveMockPool();
+    expect(
+      call(
+        "deploy",
+        [Cl.principal(mockPool), Cl.uint(0), Cl.uint(1_000_000)],
+        deployer
+      ).result
+    ).toBeOk(Cl.bool(true));
+    expect(stxBalance(mockPool)).toBe(1_000_000);
+    expect(deployed()).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(1_000_000) });
+    // nothing to deploy at all
+    expect(
+      call("deploy", [Cl.principal(mockPool), Cl.uint(0), Cl.uint(0)], deployer)
+        .result
+    ).toBeErr(Cl.uint(500));
+  });
+
+  test("admin-stx-transfer takes the surplus and not a uSTX more", () => {
+    call("deposit-stx", [Cl.uint(3_000_000)], wallet1);
+    simnet.transferSTX(500, vaultId, wallet2);
+    const stxTransfer = (amount: number) =>
+      call(
+        "admin-stx-transfer",
+        [Cl.uint(amount), Cl.principal(deployer), Cl.list([])],
+        deployer
+      ).result;
+    expect(stxTransfer(501)).toBeErr(Cl.uint(500));
+    expect(stxTransfer(500)).toBeOk(Cl.bool(true));
+    expect(stxTransfer(1)).toBeErr(Cl.uint(500));
+    expect(stxBalance(vaultId)).toBe(3_000_000);
   });
 
   test("pool principal counts towards the collateral check", () => {
@@ -268,6 +368,22 @@ describe("bxl-vault-v2 sBTC pools", () => {
     expect(deployed()).toBeTuple({ sats: Cl.uint(1_000), ustx: Cl.uint(0) });
   });
 
+  test("pool-withdrawn needs the adapter to act as itself", () => {
+    call("deposit", [Cl.uint(10_000)], wallet1);
+    approveMockPool();
+    call("deploy", [Cl.principal(mockPool), Cl.uint(5_000), Cl.uint(0)], deployer);
+    // the adapter is contract-caller, but tx-sender is still the wallet
+    expect(
+      simnet.callPublicFn(
+        "mock-sbtc-pool",
+        "report-withdrawn-as-caller",
+        [Cl.uint(0)],
+        wallet2
+      ).result
+    ).toBeErr(Cl.uint(401));
+    expect(deployed()).toBeTuple({ sats: Cl.uint(5_000), ustx: Cl.uint(0) });
+  });
+
   test("deploy fails when the adapter sends anything back", () => {
     call("deposit", [Cl.uint(10_000)], wallet1);
     approveMockPool();
@@ -278,6 +394,12 @@ describe("bxl-vault-v2 sBTC pools", () => {
         .result
     ).toBeErr(Cl.uint(504));
     expect(deployed()).toBeTuple({ sats: Cl.uint(0), ustx: Cl.uint(0) });
+  });
+
+  test("collect-rewards only from approved pools", () => {
+    expect(
+      call("collect-rewards", [Cl.principal(mockPool)], wallet1).result
+    ).toBeErr(Cl.uint(502));
   });
 
   test("collect-rewards fails when the adapter reports more than it sends", () => {
@@ -435,14 +557,24 @@ describe("admins", () => {
   const setAdmin = (who: string, enable: boolean, sender: string) =>
     call("admin-set-admin", [Cl.principal(who), Cl.bool(enable)], sender).result;
 
+  const adminCount = () =>
+    simnet.callReadOnlyFn(VAULT, "get-admin-count", [], wallet1).result;
+
   test("there is always at least one admin", () => {
+    expect(adminCount()).toBeUint(1);
     // the only admin cannot step down
     expect(setAdmin(deployer, false, deployer)).toBeErr(Cl.uint(403));
     expect(setAdmin(wallet1, true, deployer)).toBeOk(Cl.bool(true));
+    expect(adminCount()).toBeUint(2);
     // enabling an admin twice does not count twice
     expect(setAdmin(wallet1, true, deployer)).toBeOk(Cl.bool(true));
+    expect(adminCount()).toBeUint(2);
     // with two admins, one may step down or remove the other
     expect(setAdmin(deployer, false, deployer)).toBeOk(Cl.bool(true));
+    expect(adminCount()).toBeUint(1);
+    // disabling a non-admin does not count either
+    expect(setAdmin(wallet2, false, wallet1)).toBeOk(Cl.bool(true));
+    expect(adminCount()).toBeUint(1);
     expect(setAdmin(deployer, false, wallet1)).toBeOk(Cl.bool(true));
     expect(setAdmin(wallet1, false, wallet1)).toBeErr(Cl.uint(403));
     expect(setAdmin(wallet2, false, wallet1)).toBeOk(Cl.bool(true));
@@ -453,10 +585,22 @@ describe("admins", () => {
 
 describe("pox-5 STX staking", () => {
   test("only approved signer managers", () => {
-    const manager = Cl.principal(`${deployer}.mock-sbtc-pool`);
+    const manager = Cl.principal(`${deployer}.signer-manager`);
     expect(
       call("stake", [manager, Cl.uint(1_000_000), Cl.uint(1)], wallet1)
         .result
     ).toBeErr(Cl.uint(401));
+    expect(
+      call("stake", [manager, Cl.uint(1_000_000), Cl.uint(1)], deployer)
+        .result
+    ).toBeErr(Cl.uint(503));
+    expect(
+      call("stake-update", [manager, manager, Cl.uint(1), Cl.uint(0)], wallet1)
+        .result
+    ).toBeErr(Cl.uint(401));
+    expect(
+      call("stake-update", [manager, manager, Cl.uint(1), Cl.uint(0)], deployer)
+        .result
+    ).toBeErr(Cl.uint(503));
   });
 });

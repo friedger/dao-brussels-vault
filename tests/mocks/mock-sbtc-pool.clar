@@ -79,6 +79,12 @@
   )
 )
 
+;; Reports a withdrawal without acting as itself (no `as-contract?`), so
+;; `tx-sender` stays whoever called. The vault must refuse it.
+(define-public (report-withdrawn-as-caller (sats uint))
+  (contract-call? .bxl-vault-v2 pool-withdrawn sats u0 u0 u0)
+)
+
 (define-public (collect-rewards)
   (let ((amount (var-get rewards)))
     (asserts! (is-eq contract-caller VAULT) ERR_UNAUTHORIZED)

@@ -422,7 +422,7 @@
 
 ;; STX staking (pox-5)
 ;;
-;; pox-5 has no delegation: the vault stakes its own STX through a signer
+;; the vault stakes its own STX through a signer
 ;; manager, and the manager pays the vault's share of the rewards in sBTC
 ;; (`claim-staker-rewards`, callable by anyone).
 
@@ -436,7 +436,7 @@
     (asserts! (is-manager-approved (contract-of manager))
       ERR_MANAGER_NOT_APPROVED
     )
-    (as-contract? ((with-staking amount) (with-pox))
+    (as-contract? ((with-staking amount))
       (try! (contract-call? 'SP000000000000000000002Q6VF78.pox-5 stake manager amount
         cycles burn-block-height none
       ))
@@ -456,7 +456,10 @@
     (asserts! (is-manager-approved (contract-of manager))
       ERR_MANAGER_NOT_APPROVED
     )
-    (as-contract? ((with-staking amount-increase) (with-pox))
+    (as-contract?
+      (
+        (with-staking (+ (get locked (stx-account current-contract)) amount-increase))
+      )
       (try! (contract-call? 'SP000000000000000000002Q6VF78.pox-5 stake-update manager
         old-manager cycles-to-extend amount-increase none
       ))

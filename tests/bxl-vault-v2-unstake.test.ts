@@ -164,6 +164,46 @@ describe("STX withdrawal after the admin unstakes", () => {
     expect(Number(stxAccount(wallet1).value.unlocked.value)).toBe(before + STX);
   });
 
+  test("stake-update locks more STX and extends the lock", () => {
+    registerSigner();
+    call("deposit-stx", [Cl.uint(STX + 500_000_000)], wallet1);
+    avoidPreparePhase();
+    expect(
+      call("stake", [Cl.principal(managerId), Cl.uint(STX), Cl.uint(2)], deployer)
+        .result
+    ).toHaveClarityType(ClarityType.ResponseOk);
+    const before = (
+      readPox("get-staker-info", [Cl.principal(vaultId)]) as any
+    ).value.value;
+
+    avoidPreparePhase();
+    const updated = call(
+      "stake-update",
+      [
+        Cl.principal(managerId),
+        Cl.principal(managerId),
+        Cl.uint(1),
+        Cl.uint(500_000_000),
+      ],
+      deployer
+    );
+    expect(updated.result).toHaveClarityType(ClarityType.ResponseOk);
+    expect(lockedStx(vaultId)).toBe(STX + 500_000_000);
+    const after = (readPox("get-staker-info", [Cl.principal(vaultId)]) as any)
+      .value.value;
+    expect(num(after["amount-ustx"])).toBe(STX + 500_000_000);
+    expect(num(after["num-cycles"])).toBe(num(before["num-cycles"]) + 1);
+
+    // all of it is still the users': locked STX counts as held
+    expect(
+      call(
+        "admin-stx-transfer",
+        [Cl.uint(1), Cl.principal(deployer), Cl.list([])],
+        deployer
+      ).result
+    ).toBeErr(Cl.uint(500));
+  });
+
   test("unstake is only for the admin", () => {
     registerSigner();
     expect(
