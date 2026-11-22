@@ -84,7 +84,7 @@ The vault admin is a 3-of-5 multisig of DAO Brussels stewards: any 3 of the 5 ke
 | The admin can | The admin cannot |
 | --- | --- |
 | Move the vault's sBTC and STX into an approved pool, and back | Transfer or burn your bxlBTC or bxlSTX |
-| Choose and switch the pool: StackingDAO stBTC, the Xverse bond pool or the Esbee bond pool. It approves pools itself, so it could also approve a contract that keeps the funds | Send sBTC or STX that backs user deposits straight to itself; the direct transfer is capped at the rewards |
+| Choose and switch the pool: StackingDAO stBTC, the Xverse bond pool or the vault's own bond seat. It approves pools itself, so it could also approve a contract that keeps the funds | Send sBTC or STX that backs user deposits straight to itself; the direct transfer is capped at the rewards |
 | Stake the vault's STX with a pox-5 signer, and unstake it | Change the 1:1 amount you get back |
 | Finalize a withdrawal before its waiting time is over | Stop a withdrawal once its waiting time is over and the vault holds the sBTC |
 | Send the rewards, the sBTC above what users are owed, to the community | Change the vault's code |
@@ -92,13 +92,13 @@ The vault admin is a 3-of-5 multisig of DAO Brussels stewards: any 3 of the 5 ke
 
 ### Where the sBTC goes
 
-sBTC only earns in pox-5 through a Bitcoin staking bond, and only pools on a bond's allowlist can join. The admin picks one of these:
+sBTC only earns in pox-5 through a Bitcoin staking bond, and only stakers on a bond's allowlist can join. The admin picks one of these:
 
 | Pool | How the sBTC earns | How fast the admin can get it back |
 | --- | --- | --- |
 | StackingDAO stBTC | swapped for stBTC, which grows against sBTC | at once from StackingDAO's idle reserve, with a 1% fee; or about 29 days (4,200 blocks) without the fee |
 | Xverse bond pool | in a 6-month bond, rolled into the next bond only when the admin commits | at the end of the bond, or early outside a pox-5 prepare phase |
-| Esbee bond pool | in a 6-month bond, rolled into the next bond automatically | at the end of the bond after an exit request, or early outside a pox-5 prepare phase |
+| The vault's own bond seat | in a 6-month bond, staked with Fast Pool; rolled into the next bond when the admin registers it | at the end of the bond, or early outside a pox-5 prepare phase |
 
 A bond also needs STX next to the sBTC, at least 5% of the sBTC's value. That STX comes from bxlSTX deposits and stays locked until the bond ends, even if the sBTC leaves early.
 
@@ -148,8 +148,8 @@ You can lose some or all of your BTC, or wait months to get it back. Read each r
 | **Delays to get your money back** | Your withdrawal cannot be finalized until the admin brings sBTC back from the pool: up to about 29 days for stBTC without the fee, up to about 6 months for a bond. The STX leg of a bond stays locked until the bond ends. | The 7-day minimum wait; the stewards keep some sBTC free in the vault; early exit from bonds outside prepare phases. |
 | **Admin keys** | 3 of the 5 stewards, or anyone holding 3 of their keys, can approve any contract as a pool and move all deposits into it, so they could take everything. They can also pick a risky pool, add admins, or leave funds in a pool and delay withdrawals. | The 3-of-5 threshold and stewards known to the community. Every pool approval and every move is public on Stacks, so anyone can watch. |
 | **Admin inactivity** | If the stewards do not act, sBTC stays in a pool and your withdrawal cannot be finalized. | Nothing in the code: only the admin can bring sBTC back from a pool into the vault. Five stewards make it unlikely that fewer than 3 are reachable. |
-| **Smart contracts** | A bug in the vault, the pool adapters, the pools or pox-5 can lock or lose funds. Version 2 and pox-5 are new. Testing has already found a bug in the vault's withdrawal requests (fixed in version 2) and one in an unreleased Esbee pool version. | Tests; an audit before launch is an open question. |
-| **Pool operators** | StackingDAO, Xverse and Esbee run their own contracts, operators and signers. Their bugs, decisions or failures affect the vault's sBTC. | The admin can switch pools; the vault only uses approved pools. |
+| **Smart contracts** | A bug in the vault, the pool adapters, the pools or pox-5 can lock or lose funds. Version 2 and pox-5 are new. Testing has already found a bug in the vault's withdrawal requests (fixed in version 2), one in an unreleased Esbee pool version, and one in the vault's STX `stake-update` (fixed). | Tests; an audit before launch is an open question. |
+| **Pool operators** | StackingDAO and Xverse run their own contracts, operators and signers; the vault's own bond seat stakes with Fast Pool's signer. Their bugs, decisions or failures affect the vault's sBTC. | The admin can switch pools; the vault only uses approved pools. |
 | **sBTC bridge** | sBTC is backed by BTC held by the sBTC signers. If they fail, are hacked or collude, sBTC can lose its backing or bridging back can stop. | A threshold of independent signers; this risk is the same for every sBTC holder. |
 | **Bond allowlist** | Each bond's allowlist is set by the pox-5 bond admin. If no pool the vault uses is on it, the sBTC earns nothing. | No loss to you: the sBTC waits in the vault or the pool. |
 | **Exit fees** | Getting sBTC out of stBTC at once costs 1%. The vault absorbs it as a loss. | The admin can use the fee-free 29-day route when there is time. |
@@ -166,6 +166,5 @@ These need an answer before this manual goes to users.
 - [ ] The 5 stewards and the multisig address. The deploying key is the first admin; once the multisig is added, the deploying key removes itself (the vault always keeps at least one admin).
 - [ ] An independent audit of version 2 before deposits open.
 - [ ] How much sBTC the stewards keep free in the vault for withdrawals, and their target time to bring sBTC back from a pool on request.
-- [ ] The pool for bond 3, which starts at Bitcoin block 974,750 (early November 2026): Esbee if it gets on the allowlist, otherwise Xverse or stBTC.
-- [ ] A fix in the Esbee pool for the STX leg after a full early exit, before Esbee is used.
+- [ ] An allowance for the vault's own bond seat (planned 0.5 BTC), first for bond 5 (starts at Bitcoin block 983,150, early January 2027); until then Xverse or stBTC.
 - [ ] The sBTC bridge link the app points users to.

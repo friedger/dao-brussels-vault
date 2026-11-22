@@ -1,0 +1,69 @@
+# Manifest for the mainnet deployment of BXL Vault v2.
+#
+# Lists only what goes on chain. `Clarinet.toml` also carries test contracts
+# (signer-manager, mock-sbtc-pool, the Rendezvous harness) that must never be
+# published. Every principal in these contracts is already the mainnet one.
+#
+#   # settings/Mainnet.toml holds the deployer's mnemonic (gitignored)
+#   clarinet check --manifest-path Clarinet-mainnet.toml
+#   clarinet deployments generate --mainnet --manifest-path Clarinet-mainnet.toml --medium-cost
+#   clarinet deployments apply --mainnet --manifest-path Clarinet-mainnet.toml
+#
+# See docs/mainnet-launch.md.
+[project]
+name = "dao-brussels-vault"
+description = "BXL Vault v2 on pox-5"
+authors = []
+telemetry = false
+cache_dir = "./.cache"
+# Needed for analysis only; requirements are never published on mainnet.
+requirements = [
+    {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token"},
+    {contract_id = "SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1"},
+    {contract_id = "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.fastpool-max500-signer-manager"}
+]
+
+# The canonical pox-5, as deployed on mainnet (see Clarinet.toml).
+[project.override_boot_contracts_source]
+pox-5 = "./boot/pox-5.clar"
+
+# Order matters: the vault binds both tokens to itself when it is published,
+# and both check that it is their own deployer doing so. The pool contracts
+# name the vault, so they come after it.
+
+[contracts.bxl-btc-v2]
+path = "contracts/bxl-btc.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bxl-stx-v2]
+path = "contracts/bxl-stx.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.sbtc-pool-trait]
+path = "contracts/sbtc-pool-trait.clar"
+clarity_version = 6
+epoch = "4.0"
+
+[contracts.bxl-vault-v2]
+path = "contracts/bxl-vault-v2.clar"
+clarity_version = 6
+epoch = "4.0"
+
+# The vault's own pox-5 bond seat (Fast Pool max500). Its address is what the
+# bond allowance is requested for.
+[contracts.bxl-pool-bond]
+path = "contracts/bxl-pool-bond.clar"
+clarity_version = 6
+epoch = "4.0"
+
+# Always-open parking place between bonds.
+[contracts.bxl-pool-stbtc]
+path = "contracts/bxl-pool-stbtc.clar"
+clarity_version = 6
+epoch = "4.0"
+
+# Not in the launch set: `bxl-pool-xverse` is pinned to Xverse lane 3, which
+# is full and bonded until bond 9. Publish a lane-specific copy later if Xverse
+# is ever needed; the vault approves pools at runtime with `admin-set-pool`.

@@ -66,17 +66,17 @@ plan:
     - transaction-type: emulated-contract-publish
       contract-name: dao
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.dao.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.dao.clar
       clarity-version: 2
     - transaction-type: emulated-contract-publish
       contract-name: sip-010-trait-ft-standard
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.sip-010-trait-ft-standard.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.sip-010-trait-ft-standard.clar
       clarity-version: 2
     - transaction-type: emulated-contract-publish
       contract-name: nft-trait
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.nft-trait.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.nft-trait.clar
       clarity-version: 2
     epoch: '2.4'
   - id: 1
@@ -84,7 +84,7 @@ plan:
     - transaction-type: emulated-contract-publish
       contract-name: sbtc-withdrawal
       emulated-sender: SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4
-      path: .cache/requirements/SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-withdrawal.clar
+      path: ./.cache/requirements/SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-withdrawal.clar
       clarity-version: 3
     epoch: '3.0'
   - id: 2
@@ -92,37 +92,37 @@ plan:
     - transaction-type: emulated-contract-publish
       contract-name: position-trait-v1
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.position-trait-v1.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.position-trait-v1.clar
       clarity-version: 3
     - transaction-type: emulated-contract-publish
       contract-name: ststxbtc-tracking-data
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking-data.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking-data.clar
       clarity-version: 3
     - transaction-type: emulated-contract-publish
       contract-name: ststxbtc-tracking
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking.clar
       clarity-version: 3
     - transaction-type: emulated-contract-publish
       contract-name: ststxbtc-token
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-token.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-token.clar
       clarity-version: 2
     - transaction-type: emulated-contract-publish
       contract-name: ststxbtc-tracking-data-v2
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking-data-v2.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking-data-v2.clar
       clarity-version: 2
     - transaction-type: emulated-contract-publish
       contract-name: ststxbtc-tracking-v2
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking-v2.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-tracking-v2.clar
       clarity-version: 2
     - transaction-type: emulated-contract-publish
       contract-name: ststxbtc-token-v2
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-token-v2.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.ststxbtc-token-v2.clar
       clarity-version: 2
     epoch: '3.1'
   - id: 3
@@ -130,85 +130,55 @@ plan:
     - transaction-type: emulated-contract-publish
       contract-name: commission-sbtc-v1
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.commission-sbtc-v1.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.commission-sbtc-v1.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: data-pools-stbtc-v1
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.data-pools-stbtc-v1.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.data-pools-stbtc-v1.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: stbtc-reserve
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-reserve.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-reserve.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: stbtc-token
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-token.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-token.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: data-stbtc-v1
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.data-stbtc-v1.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.data-stbtc-v1.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: rewards-pox5-v1
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.rewards-pox5-v1.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.rewards-pox5-v1.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: stbtc-withdraw-nft
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-withdraw-nft.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stbtc-withdraw-nft.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: withdraw-data-stbtc
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.withdraw-data-stbtc.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.withdraw-data-stbtc.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: stacking-dao-core-stbtc-v1
       emulated-sender: SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG
-      path: .cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1.clar
+      path: ./.cache/requirements/SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1.clar
       clarity-version: 6
     - transaction-type: emulated-contract-publish
-      contract-name: sbtc-bond-treasury-v1-3
-      emulated-sender: SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE
-      path: .cache/requirements/SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-treasury-v1-3.clar
-      clarity-version: 6
-    - transaction-type: emulated-contract-publish
-      contract-name: sbtc-bond-staker-v1-3
-      emulated-sender: SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE
-      path: .cache/requirements/SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3.clar
+      contract-name: fastpool-max500-signer-manager
+      emulated-sender: SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4
+      path: ./.cache/requirements/SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.fastpool-max500-signer-manager.clar
       clarity-version: 6
       remap-principals:
         SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
-    - transaction-type: emulated-contract-publish
-      contract-name: bond-escrow
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: ../../fastpool/sbtc-pool-bond-staker-v-bond-1/rendezvous/bond-escrow.clar
-      clarity-version: 6
-    - transaction-type: emulated-contract-publish
-      contract-name: bond-treasury
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: ../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/bond-treasury.clar
-      clarity-version: 6
-    - transaction-type: emulated-contract-publish
-      contract-name: iou-bond-btc
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: ../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/iou-bond-btc.clar
-      clarity-version: 6
-    - transaction-type: emulated-contract-publish
-      contract-name: iou-bond-stx
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: ../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/iou-bond-stx.clar
-      clarity-version: 6
-    - transaction-type: emulated-contract-publish
-      contract-name: bond-staker
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: ../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/bond-staker.clar
-      clarity-version: 6
     - transaction-type: emulated-contract-publish
       contract-name: bxl-btc-v2
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
@@ -232,9 +202,9 @@ plan:
       remap-principals:
         SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
     - transaction-type: emulated-contract-publish
-      contract-name: bxl-pool-esbee
+      contract-name: bxl-pool-bond
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: contracts/bxl-pool-esbee.clar
+      path: contracts/bxl-pool-bond.clar
       clarity-version: 6
       remap-principals:
         SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
@@ -243,33 +213,4 @@ plan:
       emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       path: contracts/bxl-pool-stbtc.clar
       clarity-version: 6
-    - transaction-type: emulated-contract-publish
-      contract-name: bxl-pool-xverse
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: contracts/bxl-pool-xverse.clar
-      clarity-version: 6
-      remap-principals:
-        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
-    - transaction-type: emulated-contract-publish
-      contract-name: mock-sbtc-pool
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: tests/mocks/mock-sbtc-pool.clar
-      clarity-version: 6
-    - transaction-type: emulated-contract-publish
-      contract-name: bxl-vault-v2-rv
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: rendezvous/bxl-vault-v2-rv.clar
-      clarity-version: 6
-      remap-principals:
-        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
-    epoch: '4.0'
-  - id: 4
-    transactions:
-    - transaction-type: emulated-contract-publish
-      contract-name: signer-manager
-      emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-      path: ../../fastpool/fastpool-pox-5/contracts/signer-manager.clar
-      clarity-version: 6
-      remap-principals:
-        SP000000000000000000002Q6VF78: ST000000000000000000002AMW42H
     epoch: '4.0'

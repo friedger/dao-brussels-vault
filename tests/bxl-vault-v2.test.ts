@@ -478,7 +478,7 @@ describe("bxl-vault-v2 sBTC pools", () => {
 });
 
 describe("pool adapters", () => {
-  test.each(["bxl-pool-stbtc", "bxl-pool-xverse", "bxl-pool-esbee", "mock-sbtc-pool"])(
+  test.each(["bxl-pool-stbtc", "bxl-pool-xverse", "bxl-pool-bond", "mock-sbtc-pool"])(
     "%s only takes calls from the vault",
     (adapter) => {
       expect(
@@ -500,7 +500,12 @@ describe("pool adapters", () => {
         .result
     ).toBeErr(Cl.uint(401));
     expect(
-      simnet.callPublicFn("bxl-pool-esbee", "request-exit", [], wallet1).result
+      simnet.callPublicFn(
+        "bxl-pool-bond",
+        "register",
+        [Cl.principal(`${deployer}.signer-manager`), Cl.uint(1)],
+        wallet1
+      ).result
     ).toBeErr(Cl.uint(401));
     expect(
       simnet.callPublicFn("bxl-pool-stbtc", "init-withdraw", [Cl.uint(1)], wallet1)

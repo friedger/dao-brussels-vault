@@ -1,6 +1,6 @@
 # BXL Vault: migration to pox-5
 
-Status: plan, 2026-10-08 (revised the same day with the Xverse bond pool and the bond 3 allowlist campaign). Nothing in this document has been implemented yet.
+Status: plan, 2026-10-08 (revised the same day with the Xverse bond pool and the bond 3 allowlist campaign). Implemented since: `bxl-vault-v2` with the stBTC and Xverse adapters. Superseded on 2026-11-20: the Esbee adapter was dropped (the v1 Esbee pool cannot take deposits before bond 7) in favour of the vault's own bond seat, see [bxl-bond-staker-plan.md](bxl-bond-staker-plan.md). Fast Pool's max500 fee is 450 bps today, not 0.
 
 ## 1. Why the current contracts no longer earn anything
 

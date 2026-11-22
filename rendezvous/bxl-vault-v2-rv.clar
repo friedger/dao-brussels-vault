@@ -23,7 +23,7 @@
 
 ;; Every contract in this project that implements `sbtc-pool-trait`, so every
 ;; contract the vault can ever have deployed into here.
-(define-constant POOLS (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee))
+(define-constant POOLS (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-bond))
 
 (define-constant MIN_DELAY u1000)
 ;; Delays above the minimum, so some requests wait longer.
@@ -195,7 +195,7 @@
   )
   (contract-call? .bxl-vault-v2 admin-sbtc-transfer
     (up-to amount (get-vault-sbtc)) recipient
-    (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee)
+    (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-bond)
   )
 )
 
@@ -205,7 +205,7 @@
   )
   (contract-call? .bxl-vault-v2 admin-stx-transfer
     (up-to amount (stx-get-balance .bxl-vault-v2)) recipient
-    (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee)
+    (list .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-bond)
   )
 )
 
@@ -299,6 +299,23 @@
 ;; `pool-withdrawn`.
 (define-public (mock-withdraw (sats uint))
   (contract-call? .mock-sbtc-pool withdraw sats)
+)
+
+;;; The vault's own bond seat. pox-5's bond calls (`register`,
+;;; `unstake-sbtc`) need a bond set up by the bond admin, which no fuzzer
+;;; account is; the vitest suite covers them. Here the seat holds idle
+;;; principal, gets paid like a seat would, and hands both back.
+
+;; Admin only (checked by the adapter).
+(define-public (bond-withdraw)
+  (contract-call? .bxl-pool-bond withdraw u0)
+)
+
+;; Anyone may pay the seat, as max500's permissionless claim does.
+(define-public (bond-pay-rewards (sats uint))
+  (contract-call? 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token transfer
+    (mod sats MAX_AMOUNT) tx-sender .bxl-pool-bond none
+  )
 )
 
 ;;; Properties (rv property mode)
@@ -517,7 +534,7 @@
           (is-eq
             (contract-call? .bxl-vault-v2 admin-sbtc-transfer amount tx-sender
               (list
-                .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee
+                .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-bond
               ))
             (err u500)
           )
@@ -556,7 +573,7 @@
         (unwrap!
           (contract-call? .bxl-vault-v2 admin-sbtc-transfer sats admin
             (list
-              .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee
+              .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-bond
             ))
           (err u1602)
         )
@@ -580,7 +597,7 @@
         (is-eq
           (contract-call? .bxl-vault-v2 admin-sbtc-transfer amount tx-sender
             (list
-              .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-esbee
+              .mock-sbtc-pool .bxl-pool-stbtc .bxl-pool-xverse .bxl-pool-bond
             ))
           (err u401)
         )
@@ -800,9 +817,9 @@
             ustx: u0,
           }
         )))
-      (esbee (counted .bxl-pool-esbee
-        (if (has-principal-id .bxl-pool-esbee)
-          (unwrap-panic (contract-call? .bxl-pool-esbee get-value))
+      (bond (counted .bxl-pool-bond
+        (if (has-principal-id .bxl-pool-bond)
+          (unwrap-panic (contract-call? .bxl-pool-bond get-value))
           {
             sats: u0,
             ustx: u0,
@@ -810,8 +827,8 @@
         )))
     )
     {
-      sats: (+ (get sats mock) (get sats stbtc) (get sats xverse) (get sats esbee)),
-      ustx: (+ (get ustx mock) (get ustx stbtc) (get ustx xverse) (get ustx esbee)),
+      sats: (+ (get sats mock) (get sats stbtc) (get sats xverse) (get sats bond)),
+      ustx: (+ (get ustx mock) (get ustx stbtc) (get ustx xverse) (get ustx bond)),
     }
   )
 )

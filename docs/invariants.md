@@ -136,9 +136,13 @@ that can succeed: up to what the caller or the vault holds, and ids issued so
 far. `rendezvous/rv.config.json` limits the callers to the deployer and three
 wallets, so about a quarter of all calls come from an admin.
 
-Only the mock pool can be deployed into on simnet: the StackingDAO contracts
-are not activated, and the Xverse and Esbee pools are not set up for bonds.
-The adapters for the real pools are covered by the unit tests.
+The fuzzer can deploy into the mock pool and into `bxl-pool-bond`, the vault's
+own bond seat: deposits there wait as idle principal, anyone may pay the seat
+rewards (`bond-pay-rewards`), and an admin hands both back (`bond-withdraw`,
+`collect-rewards`). Its pox-5 calls need a bond set up by the bond admin, which
+no fuzzer account is; `tests/bxl-pool-bond.test.ts` covers them. The
+StackingDAO contracts are not activated on simnet, and the Xverse pool is not
+set up for bonds; the unit tests cover those adapters.
 
 Two mutants show the checks have teeth:
 

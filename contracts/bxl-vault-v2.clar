@@ -2,7 +2,7 @@
 ;;
 ;; Users deposit sBTC and STX and get bxl-btc and bxl-stx 1:1.
 ;; The admin puts the sBTC to work in one of the sBTC pools behind
-;; `sbtc-pool-trait` (stBTC, Xverse, Esbee) and stakes the free STX with a
+;; `sbtc-pool-trait` (its own bond seat, stBTC, Xverse) and stakes the free STX with a
 ;; pox-5 signer manager. All rewards arrive in this contract as sBTC; anything
 ;; above what the vault owes its users is the yield.
 

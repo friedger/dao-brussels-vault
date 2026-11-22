@@ -10,7 +10,9 @@ requirements = [
     {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-deposit"},
     {contract_id = "SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-withdrawal"},
     {contract_id = "SP4SZE494VC2YC5JYG7AYFQ44F5Q4PYV7DVMDPBG.stacking-dao-core-stbtc-v1"},
-    {contract_id = "SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3"}
+    {contract_id = "SP8HK160YD5GHXP69VGA0TC7AQJ1X4CDW3XVERSE.sbtc-bond-staker-v1-3"},
+    # Fast Pool's max500 signer manager, which `bxl-pool-bond` stakes with.
+    {contract_id = "SPMPMA1V6P430M8C91QS1G9XJ95S59JS1TZFZ4Q4.fastpool-max500-signer-manager"}
 ]
 
 # Clarinet's bundled pox-5 differs from the canonical one the pools and signer
@@ -32,33 +34,6 @@ epoch = "4.0"
 
 ## v2 (pox-5)
 
-# Esbee bond pool as deployed on mainnet (esbee-dao-bond-staker-1 and friends):
-# git tag v-bond-1 of fastpool/sbtc-pool-bond-staker, checked out as a worktree.
-[contracts.bond-escrow]
-path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/rendezvous/bond-escrow.clar"
-clarity_version = 6
-epoch = "4.0"
-
-[contracts.bond-treasury]
-path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/bond-treasury.clar"
-clarity_version = 6
-epoch = "4.0"
-
-[contracts.iou-bond-btc]
-path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/iou-bond-btc.clar"
-clarity_version = 6
-epoch = "4.0"
-
-[contracts.iou-bond-stx]
-path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/iou-bond-stx.clar"
-clarity_version = 6
-epoch = "4.0"
-
-[contracts.bond-staker]
-path = "../../fastpool/sbtc-pool-bond-staker-v-bond-1/contracts/bond-staker.clar"
-clarity_version = 6
-epoch = "4.0"
-
 [contracts.sbtc-pool-trait]
 path = "contracts/sbtc-pool-trait.clar"
 clarity_version = 6
@@ -79,8 +54,8 @@ path = "contracts/bxl-pool-xverse.clar"
 clarity_version = 6
 epoch = "4.0"
 
-[contracts.bxl-pool-esbee]
-path = "contracts/bxl-pool-esbee.clar"
+[contracts.bxl-pool-bond]
+path = "contracts/bxl-pool-bond.clar"
 clarity_version = 6
 epoch = "4.0"
 
